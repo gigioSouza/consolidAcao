@@ -11,8 +11,8 @@
     "lib": ["esnext", "dom"],
     "types": [
       "vite-plugin-pages/client",
-      "vite-plugin-vue-layouts/client"
     ]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "vite-plugin-vue-layouts.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }
