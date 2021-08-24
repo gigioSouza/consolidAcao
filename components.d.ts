@@ -3,8 +3,20 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
+    GlobalLoader: typeof import('./src/components/GlobalLoader.vue')['default']
+    IEosIconsLoading: typeof import('virtual:vite-icons/eos-icons/loading')['default']
     IIcomoonFreeSpinner: typeof import('virtual:vite-icons/icomoon-free/spinner')['default']
     IIcomoonFreeSpinner5: typeof import('virtual:vite-icons/icomoon-free/spinner5')['default']
+    IIconParkOutlineStockMarket: typeof import('virtual:vite-icons/icon-park-outline/stock-market')['default']
+    IMdiArrowCollapseLeft: typeof import('virtual:vite-icons/mdi/arrow-collapse-left')['default']
+    IMdiArrowExpandRight: typeof import('virtual:vite-icons/mdi/arrow-expand-right')['default']
+    IMdiBank: typeof import('virtual:vite-icons/mdi/bank')['default']
+    IMdiCheck: typeof import('virtual:vite-icons/mdi/check')['default']
+    IMdiChevronDoubleLeft: typeof import('virtual:vite-icons/mdi/chevron-double-left')['default']
+    IMdiChevronDoubleRight: typeof import('virtual:vite-icons/mdi/chevron-double-right')['default']
+    IMdiFolderSearch: typeof import('virtual:vite-icons/mdi/folder-search')['default']
+    IUilBill: typeof import('virtual:vite-icons/uil/bill')['default']
+    Loader: typeof import('./src/components/Loader.vue')['default']
   }
 }
 

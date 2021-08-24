@@ -3,15 +3,17 @@
   windows_subsystem = "windows"
 )]
 
-mod config;
+pub(crate) mod database;
+pub(crate) mod config;
+mod brokers;
 
 fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
-        config::check_config,
-        config::create_config_dir,
-        config::create_database,
-        config::get_config_dir_path
+        database::create_database,
+        brokers::get_broker_list,
+        brokers::new_broker,
+        brokers::update_broker
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

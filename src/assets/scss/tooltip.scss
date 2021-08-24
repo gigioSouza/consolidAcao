@@ -1,0 +1,18 @@
+.tooltip {
+  @apply bg-black text-white pt-1 pb-0.5 px-2 rounded;
+
+  &.right {
+    &:before {
+      content: '';
+      border-top: transparent solid 5px;
+      border-bottom: transparent solid 5px;
+      border-left: transparent solid 0;
+      border-right: black solid 8px;
+      left: -8px;
+      width: 10px;
+      height: 10px;
+      transform: translateY(-50%);
+      @apply absolute top-1/2;
+    }
+  }
+}
