@@ -19,8 +19,8 @@ function focusInput() {
   brokerNameInput.value.focus();
 }
 
-const brokerName: Ref<string> = ref('');
-const editingBroker: Ref<Broker> = ref(null);
+const brokerName: Ref<string|null> = ref('');
+const editingBroker: Ref<Broker|null> = ref(null);
 
 function selectToEdit(broker: Broker) {
   if (editingBroker.value === broker) {
@@ -39,7 +39,7 @@ function cancelForm() {
 async function saveBroker() {
   try {
     if (editingBroker.value == null) {
-      const broker = await newBroker(brokerName.value);
+      const broker = await newBroker(brokerName.value as string);
       brokers.value.push(broker);
     } else {
       await updateBroker({ id: editingBroker.value.id, name: brokerName.value })

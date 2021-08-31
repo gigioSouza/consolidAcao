@@ -7,3 +7,4 @@ dist-ssr
 .idea
 src-tauri/target
 src-tauri/WixTools
+migration

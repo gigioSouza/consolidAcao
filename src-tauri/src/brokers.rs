@@ -7,14 +7,14 @@ use crate::database;
 #[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct Broker {
     pub(crate) id: i64,
-    pub(crate) name: String
+    pub(crate) name: String,
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub(crate) fn get_broker_list() -> Result<Vec<Broker>, InvokeError> {
     let connection = database::get_connection()?;
 
-    let mut statement = connection.prepare("SELECT id, name FROM corretora ORDER BY id ASC")
+    let mut statement = connection.prepare("SELECT id, nome FROM corretora ORDER BY id ASC")
         .map_err(|error| InvokeError::from(format!("{}", error)))?;
 
 
@@ -36,11 +36,11 @@ pub(crate) fn get_broker_list() -> Result<Vec<Broker>, InvokeError> {
     Ok(broker_list)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub(crate) fn new_broker(broker_name: String) -> Result<Broker, InvokeError> {
     let connection = database::get_connection()?;
 
-    let mut statement = connection.prepare("INSERT INTO corretora (name) VALUES (:name)")
+    let mut statement = connection.prepare("INSERT INTO corretora (nome) VALUES (:name)")
         .map_err(|error| InvokeError::from(format!("{}", error)))?;
 
     let id = statement.insert(named_params! { ":name": &broker_name })
@@ -52,11 +52,11 @@ pub(crate) fn new_broker(broker_name: String) -> Result<Broker, InvokeError> {
     })
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub(crate) fn update_broker(broker: Broker) -> Result<(), InvokeError> {
     let connection = database::get_connection()?;
 
-    let mut statement = connection.prepare("UPDATE corretora SET name = :name WHERE id = :id")
+    let mut statement = connection.prepare("UPDATE corretora SET nome = :name WHERE id = :id")
         .map_err(|error| InvokeError::from(format!("{}", error)))?;
 
     statement.execute(named_params! { ":id": &broker.id, ":name": &broker.name })

@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
 
 export const useGlobalLoader = defineStore('global_loader', {
-  state() {
+  state: () => {
     return {
       counter: 0
-    }
+    };
   },
   getters: {
-    isLoading({ counter }): boolean {
+    isLoading: ({ counter }): boolean => {
       return counter > 0;
     }
   },

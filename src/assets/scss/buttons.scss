@@ -1,0 +1,40 @@
+@mixin button_focus($color) {
+  &:not(&:disabled) {
+    &:focus {
+      box-shadow: 0 0 3pt 2pt $color;
+    }
+  }
+}
+
+.button {
+  @apply rounded px-2 py-1 shadow-sm flex flex-row items-center justify-between outline-none select-none;
+
+  &:hover,
+  &:visited,
+  &:focus {
+    @apply outline-none;
+  }
+
+  &.cancel {
+    @apply bg-gray-200 text-gray-800 font-light;
+    @include button_focus($color: #a1a1aa);
+  }
+
+  &.primary {
+    @apply bg-blue-600 text-white;
+    @include button_focus($color: #1d4ed8);
+  }
+
+  &.secondary {
+    @apply bg-emerald-500 text-white;
+    @include button_focus($color: #059669);
+  }
+
+  &:disabled {
+    @apply bg-opacity-30 cursor-not-allowed shadow-none;
+  }
+
+  .icon {
+    @apply ml-1;
+  }
+}

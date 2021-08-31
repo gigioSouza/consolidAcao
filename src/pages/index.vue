@@ -1,6 +1,5 @@
 <route>
 name: welcome
-path: /
 meta:
   layout: Empty
 </route>

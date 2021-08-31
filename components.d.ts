@@ -3,20 +3,28 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
+    CTable: typeof import('./src/components/CTable.vue')['default']
     GlobalLoader: typeof import('./src/components/GlobalLoader.vue')['default']
+    HeaderSlot: typeof import('./src/components/HeaderSlot.vue')['default']
     IEosIconsLoading: typeof import('virtual:vite-icons/eos-icons/loading')['default']
-    IIcomoonFreeSpinner: typeof import('virtual:vite-icons/icomoon-free/spinner')['default']
-    IIcomoonFreeSpinner5: typeof import('virtual:vite-icons/icomoon-free/spinner5')['default']
     IIconParkOutlineStockMarket: typeof import('virtual:vite-icons/icon-park-outline/stock-market')['default']
-    IMdiArrowCollapseLeft: typeof import('virtual:vite-icons/mdi/arrow-collapse-left')['default']
-    IMdiArrowExpandRight: typeof import('virtual:vite-icons/mdi/arrow-expand-right')['default']
+    IMdiArrowExpandLeft: typeof import('virtual:vite-icons/mdi/arrow-expand-left')['default']
     IMdiBank: typeof import('virtual:vite-icons/mdi/bank')['default']
     IMdiCheck: typeof import('virtual:vite-icons/mdi/check')['default']
     IMdiChevronDoubleLeft: typeof import('virtual:vite-icons/mdi/chevron-double-left')['default']
     IMdiChevronDoubleRight: typeof import('virtual:vite-icons/mdi/chevron-double-right')['default']
+    IMdiChevronLeft: typeof import('virtual:vite-icons/mdi/chevron-left')['default']
+    IMdiChevronRight: typeof import('virtual:vite-icons/mdi/chevron-right')['default']
+    IMdiContentSave: typeof import('virtual:vite-icons/mdi/content-save')['default']
     IMdiFolderSearch: typeof import('virtual:vite-icons/mdi/folder-search')['default']
+    IMdiMenuDown: typeof import('virtual:vite-icons/mdi/menu-down')['default']
+    IMdiMenuSwap: typeof import('virtual:vite-icons/mdi/menu-swap')['default']
+    IMdiMenuUp: typeof import('virtual:vite-icons/mdi/menu-up')['default']
+    IMdiPageFirst: typeof import('virtual:vite-icons/mdi/page-first')['default']
+    IMdiPageLast: typeof import('virtual:vite-icons/mdi/page-last')['default']
+    IMdiTrashCan: typeof import('virtual:vite-icons/mdi/trash-can')['default']
     IUilBill: typeof import('virtual:vite-icons/uil/bill')['default']
-    Loader: typeof import('./src/components/Loader.vue')['default']
+    Table: typeof import('./src/components/Table.vue')['default']
   }
 }
 

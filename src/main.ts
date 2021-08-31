@@ -1,17 +1,17 @@
 import { createApp } from 'vue';
-import App from './App.vue';
-import router from './config/router';
-import store from './config/store';
-import 'virtual:windi.css';
-import 'virtual:windi-devtools';
-import '~/assets/scss/fonts.scss';
 import { createPinia } from 'pinia';
-import Tooltip from './directives/tooltip';
+import App from './App.vue';
+import './config/styles';
+import router from './config/router';
+import tooltip from './directives/tooltip';
+import filters from './config/filters';
+import money from './config/money';
 
 const app = createApp(App);
 app.use(router);
-app.use(store);
-app.use(createPinia);
-app.use(Tooltip);
+app.use(createPinia());
+app.use(tooltip);
+app.use(filters);
+app.use(money);
 
 app.mount('#app');

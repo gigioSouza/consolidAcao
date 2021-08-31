@@ -4,6 +4,14 @@ import { useMenu } from '../store/menu';
 
 const route = useRoute();
 const menu = useMenu();
+
+function toggle() {
+  if (menu.isCollapsed) {
+    menu.expand();
+  } else {
+    menu.collapse();
+  }
+}
 </script>
 
 <template>
@@ -17,7 +25,7 @@ const menu = useMenu();
           </div>
         </router-link>
 
-        <router-link :to="{ name: 'brokers' }" class="item link" v-tooltip="'Corretoras'">
+        <router-link :to="{ name: 'brokers' }" class="item link" v-tooltip.right="'Corretoras'">
           <div class="content-wrapper">
             <span class="text">Corretoras</span>
             <i-mdi-bank class="icon"/>
@@ -26,7 +34,7 @@ const menu = useMenu();
 
         <hr class="separator"/>
 
-        <router-link :to="{ name: 'brokerage-list' }" class="item link" v-tooltip="'Notas de corretagem'">
+        <router-link :to="{ name: 'brokerage-list' }" class="item link" v-tooltip.right="'Corretagem'">
           <div class="content-wrapper">
             <span class="text">Corretagem</span>
             <i-uil-bill class="icon"/>
@@ -35,17 +43,15 @@ const menu = useMenu();
       </div>
 
       <div class="bottom">
-        <button type="button" class="collapse-button" @click="menu.collapse()">
-          <i-mdi-arrow-collapse-left/>
-        </button>
-        <button type="button" class="expand-button" @click="menu.expand()">
-          <i-mdi-arrow-expand-right/>
+        <button type="button" class="toggle-button" @click="toggle">
+          <i-mdi-arrow-expand-left class="icon" />
         </button>
       </div>
     </nav>
     <div class="contentContainer">
       <div class="header">
         <h1 class="title">{{ route.meta.title }}</h1>
+        <div id="header-slot"></div>
       </div>
       <div class="content">
         <router-view/>
@@ -134,15 +140,8 @@ const menu = useMenu();
     .bottom {
       @apply flex flex-row justify-end border-t border-light-blue-800;
 
-      button {
-        @apply px-4 pt-2 text-2xl text-white;
-
-        &.collapse-button {
-          @apply block border-l border-light-blue-800;
-        }
-        &.expand-button {
-          @apply hidden;
-        }
+      .toggle-button {
+        @apply pr-4 pl-3.5 pt-2 text-2xl text-white block border-l border-light-blue-800;
       }
     }
 
@@ -172,12 +171,12 @@ const menu = useMenu();
       }
 
       .bottom {
-        button {
-          &.collapse-button {
-            @apply hidden;
-          }
-          &.expand-button {
-            @apply block flex-grow;
+        .toggle-button {
+          @apply flex-grow;
+
+          .icon {
+            animation: collapse-toggle .3s;
+            transform: rotate(180deg);
           }
         }
       }
@@ -185,6 +184,14 @@ const menu = useMenu();
 
     &.expanded {
       animation: expand .3s;
+
+      .bottom {
+        .toggle-button {
+          .icon {
+            animation: expand-toggle .3s;
+          }
+        }
+      }
     }
   }
 
@@ -193,10 +200,14 @@ const menu = useMenu();
 
     .header {
       height: 60px;
-      @apply relative p-4 bg-white flex flex-row justify-between shadow z-60;
+      @apply relative bg-white flex flex-row justify-between shadow z-60 items-center;
 
       .title {
-        @apply text-gray-700 text-xl;
+        @apply text-gray-700 text-xl p-4;
+      }
+
+      #header-slot {
+        @apply flex-grow flex flex-row items-center justify-end px-4;
       }
     }
 
@@ -216,12 +227,84 @@ const menu = useMenu();
   }
 }
 
+@keyframes collapse-toggle {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(18deg);
+  }
+  20% {
+    transform: rotate(36deg);
+  }
+  30% {
+    transform: rotate(54deg);
+  }
+  40% {
+    transform: rotate(72deg);
+  }
+  50% {
+    transform: rotate(90deg);
+  }
+  60% {
+    transform: rotate(108deg);
+  }
+  70% {
+    transform: rotate(126deg);
+  }
+  80% {
+    transform: rotate(144deg);
+  }
+  90% {
+    transform: rotate(162deg);
+  }
+  100% {
+    transform: rotate(180deg);
+  }
+}
+
 @keyframes expand {
   0% {
     width: calc(50px + 1rem);
   }
   100% {
     width: 200px;
+  }
+}
+
+@keyframes expand-toggle {
+  0% {
+    transform: rotate(180deg);
+  }
+  10% {
+    transform: rotate(162deg);
+  }
+  20% {
+    transform: rotate(144deg);
+  }
+  30% {
+    transform: rotate(126deg);
+  }
+  40% {
+    transform: rotate(108deg);
+  }
+  50% {
+    transform: rotate(90deg);
+  }
+  60% {
+    transform: rotate(72deg);
+  }
+  70% {
+    transform: rotate(54deg);
+  }
+  80% {
+    transform: rotate(36deg);
+  }
+  90% {
+    transform: rotate(18deg);
+  }
+  100% {
+    transform: rotate(0deg);
   }
 }
 </style>

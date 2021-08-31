@@ -14,7 +14,8 @@ export default defineConfig({
       extensions: ['vue'],
       exclude: [
         '**/components/*.*',
-        '**/store/*.*'
+        '**/store/*.*',
+        '**/composables/*.*'
       ],
       routeBlockLang: 'yaml'
     }),

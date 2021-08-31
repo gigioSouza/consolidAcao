@@ -1,13 +1,23 @@
 import '~/assets/scss/tooltip.scss';
 import uniqueId from 'lodash-es/uniqueId';
+import { App } from 'vue';
+import { DirectiveBinding } from '@vue/runtime-core';
 
 export default {
   install
 }
 
-function install(Vue) {
+interface TooltipDefinition {
+  element: null | HTMLElement,
+  visible: boolean,
+  onMouseenter: null | ((el: HTMLElement, binding: DirectiveBinding) => void),
+  onMouseleave: null | ((el: HTMLElement, binding: DirectiveBinding) => void)
+}
+
+const instances: Map<string, TooltipDefinition> = new Map<string, TooltipDefinition>();
+
+function install(Vue: App) {
   Vue.directive('tooltip', {
-    ids: {},
     created,
     mounted: bindTooltip,
     updated: bindTooltip,
@@ -15,70 +25,69 @@ function install(Vue) {
   });
 }
 
-function created(el, binding) {
+function created(el: HTMLElement) {
   const id = uniqueId('tooltip_');
   el.dataset.id = id;
-  binding.dir.ids[id] = {
-    tooltipElement: null,
+  instances.set(id, {
+    element: null,
     visible: false,
     onMouseenter: null,
     onMouseleave: null
-  };
+  });
 }
 
-function bindTooltip(el, binding) {
-  const ref = binding.dir.ids[el.dataset.id];
-  ref.tooltipElement = buildTooltip(el, binding, ref.tooltipElement);
+function bindTooltip(el: HTMLElement, binding: DirectiveBinding) {
+  const instance = instances.get(el.dataset.id);
+  buildTooltip(instance, binding);
 
-  if (ref.onMouseenter === null) {
-    ref.onMouseenter = bindOnMouseenter(el, binding);
-    ref.onMouseleave = bindOnMouseleave(el, binding);
-    el.addEventListener('mouseenter', ref.onMouseenter);
-    el.addEventListener('mouseleave', ref.onMouseleave);
+  if (instance.onMouseenter == null) {
+    instance.onMouseenter = bindOnMouseenter(el, binding);
+    instance.onMouseleave = bindOnMouseleave(el, binding);
+    el.addEventListener('mouseenter', instance.onMouseenter);
+    el.addEventListener('mouseleave', instance.onMouseleave);
   }
 }
 
-function buildTooltip(el, binding, tooltip) {
-  if (tooltip === null) {
-    tooltip = document.createElement('div');
-    tooltip.appendChild(document.createTextNode(binding.value));
-    tooltip.classList.add('tooltip');
-    tooltip.classList.add('right'); // TODO multiple placement
+function buildTooltip(instance: TooltipDefinition, binding: DirectiveBinding) {
+  if (instance.element == null) {
+    instance.element = document.createElement('div');
+    instance.element.appendChild(document.createTextNode(binding.value));
+    instance.element.classList.add('tooltip');
+    instance.element.classList.add('right'); // TODO multiple placement
   } else {
-    tooltip.textContent = binding.value;
+    instance.element.textContent = binding.value;
   }
-  return tooltip;
 }
 
-function bindOnMouseenter(el, binding) {
+function bindOnMouseenter(el: HTMLElement) {
   return () => {
-    const ref = binding.dir.ids[el.dataset.id];
-    if (ref.visible) return;
-    ref.visible = true;
-    const { tooltipElement } = ref;
-    document.body.appendChild(tooltipElement);
+    const instance = instances.get(el.dataset.id);
+    if (instance.visible) return;
+    instance.visible = true;
+    const { element } = instance;
+    document.body.appendChild(element);
     const elRect = el.getBoundingClientRect();
-    const tooltipRect = tooltipElement.getBoundingClientRect();
-    tooltipElement.style.position = 'absolute';
-    tooltipElement.style.left = `${elRect.x + elRect.width + 8}px`;
-    tooltipElement.style.top = `${elRect.y + (elRect.height/2) - (tooltipRect.height/2)}px`;
+    const tooltipRect = element.getBoundingClientRect();
+    element.style.position = 'absolute';
+    element.style.left = `${elRect.x + elRect.width + 8}px`;
+    element.style.top = `${elRect.y + (elRect.height/2) - (tooltipRect.height/2)}px`;
   }
 }
 
 
-function bindOnMouseleave(el, binding) {
+function bindOnMouseleave(el: HTMLElement) {
   return () => {
-    const ref = binding.dir.ids[el.dataset.id];
-    if (!ref.visible) return;
-    ref.visible = false;
-    document.body.removeChild(ref.tooltipElement);
+    const instance = instances.get(el.dataset.id);
+    if (!instance.visible) return;
+    instance.visible = false;
+    document.body.removeChild(instance.element);
   }
 }
 
-function unmounted(el, binding) {
+function unmounted(el: HTMLElement) {
   const id = el.dataset.id;
-  const { onMouseenter, onMouseleave } = binding.dir.ids[id];
+  const { onMouseenter, onMouseleave } = instances.get(id);
   el.removeEventListener('mouseenter', onMouseenter);
   el.removeEventListener('mouseleave', onMouseleave);
-  delete binding.dir.ids[id];
+  instances.delete(id);
 }
