@@ -1,9 +1,9 @@
 use std::fs::read_to_string;
 use std::path::Path;
 
+use serde::{Deserialize, Serialize};
 use tauri::{InvokeError, PackageInfo};
 use tauri::api::path::resource_dir;
-use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct AppConfig {

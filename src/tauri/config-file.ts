@@ -12,16 +12,16 @@ export enum ConfigError {
 
 export type AppConfig = {
   dataDir: string,
-  dbFile: string
+  dbFile: string,
+  menuCollapsed: boolean
 };
 
 const configFilePath = 'consolidacao.config.json';
-const dbFileName = 'consolidacao.db';
-let config: AppConfig = null;
 
-export async function checkConfig(): Promise<void> {
+export async function getConfigFile() {
   try {
-    config = await readTextFile(configFilePath, { dir: BaseDirectory.Resource });
+    const text = await readTextFile(configFilePath, { dir: BaseDirectory.Resource });
+    return JSON.parse(text);
   } catch (error) {
     if (error.indexOf('No such file or directory') > -1) {
       throw ConfigError.NEW_USER;
@@ -39,21 +39,26 @@ export async function openDataDirSelectionDialog(): Promise<string|string[]> {
   });
 }
 
-export async function createConfigFile(dataDir: string): Promise<void> {
-  config = {
+export async function createConfigFile(dataDir: string): Promise<AppConfig> {
+  const configFile: AppConfig = {
     dataDir,
-    dbFile: `${dataDir}/${dbFileName}`
-  }
+    dbFile: `${dataDir}/consolidacao.db`,
+    menuCollapsed: false
+  };
 
   await createDir(dataDir, { recursive: true });
   await writeFile({
     contents: '',
-    path: config.dbFile
+    path: configFile.dbFile
   });
 
+  return configFile;
+}
+
+export async function updateConfigFile(configFile: AppConfig) {
   await writeFile({
     path: configFilePath,
-    contents: JSON.stringify(config, null, 2)
+    contents: JSON.stringify(configFile, null, 2)
   }, {
     dir: BaseDirectory.Resource,
   });
@@ -61,9 +66,8 @@ export async function createConfigFile(dataDir: string): Promise<void> {
 
 export async function createDatabase(): Promise<void> {
   try {
-    return await invoke('create_database', { dbFile: config.dbFile });
+    return await invoke('create_database');
   } catch (error) {
     throw ConfigError[error];
   }
 }
-

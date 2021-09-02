@@ -1,17 +1,20 @@
 import { defineStore } from 'pinia';
+import { useConfig } from './config';
 
 export const useMenu = defineStore('menu', {
-  state() {
+  state: () => {
+    const configStore = useConfig();
+
     return {
-      collapsed: false,
+      collapsed: configStore.config.menuCollapsed,
       hasCollapsed: false
     }
   },
   getters: {
-    isCollapsed({ collapsed }) {
+    isCollapsed: ({ collapsed }) => {
       return collapsed;
     },
-    isExpanded({ hasCollapsed, collapsed }) {
+    isExpanded: ({ hasCollapsed, collapsed }) => {
       return hasCollapsed && !collapsed;
     }
   },

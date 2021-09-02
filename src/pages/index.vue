@@ -13,7 +13,8 @@ import {
   createDatabase,
   openDataDirSelectionDialog,
   createConfigFile
-} from '../tauri/config';
+} from '../tauri/config-file';
+import { useConfig } from '../store/config';
 
 enum WelcomeState {
   NEW_USER,
@@ -21,32 +22,22 @@ enum WelcomeState {
   DB_FILE_NOT_FOUND
 }
 
-const loading = ref(true);
+const configStore = useConfig();
+
+const loading = ref(false);
 const state = ref(false);
 const dataDir = ref(null);
 const router = useRouter();
 
-onMounted(setupConfig);
-
-async function setupConfig() {
-  try {
-    loading.value = true;
-    await checkConfig();
+onMounted(() => {
+  if (configStore.isNewUser) {
+    state.value = WelcomeState.NEW_USER;
+  } else {
     router.replace({
       name: 'home'
     });
-  } catch (error) {
-    switch (error) {
-      case ConfigError.NEW_USER:
-        state.value = WelcomeState.NEW_USER;
-        break;
-      default:
-        console.error('Erro ao verificar configurações', error);
-    }
-  } finally {
-    loading.value = false;
   }
-}
+});
 
 async function chooseDataDir() {
   try {
@@ -61,7 +52,8 @@ async function chooseDataDir() {
 async function confirmDataDir() {
   try {
     loading.value = true;
-    await createConfigFile(dataDir.value);
+    const config = await createConfigFile(dataDir.value);
+    await configStore.updateConfig(config);
     await createDatabase();
     router.replace({
       name: 'home'

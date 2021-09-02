@@ -1,10 +1,10 @@
 import { onMounted, ref, Ref } from 'vue';
-import { Broker, getBrokerList } from '../../../../tauri/brokers';
-import { useGlobalLoader } from '../../../../store/global-loader';
+import { Broker, getBrokerList } from '../tauri/brokers';
+import { useGlobalLoader } from '../store/global-loader';
 
 const loader = useGlobalLoader();
 
-export function useBroker() {
+export function useBrokers() {
   const brokers: Ref<Broker[]> = ref([]);
 
   onMounted(fetchBrokerList);
@@ -20,5 +20,5 @@ export function useBroker() {
 
   return {
     brokers
-  }
+  };
 }

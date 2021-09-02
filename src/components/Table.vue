@@ -3,6 +3,7 @@ import { computed, ref, toRefs, useSlots, watch } from 'vue';
 import { Column, SortedBy } from '../types/table';
 import range from 'lodash-es/range';
 import get from 'lodash-es/get';
+import { size } from 'lodash-es';
 
 const props = withDefaults(defineProps<{
   columns: Column[],
@@ -93,23 +94,38 @@ const isLastPage = computed(() => currentPage.value === totalPages.value - 1);
 const selectedSize = ref(pageSize.value);
 watch(pageSize, (newValue) => {
   selectedSize.value = newValue;
-})
+});
+
+const fromElement = computed(() => {
+  return (currentPage.value * pageSize.value) + 1;
+});
+const toElement = computed(() => {
+  const to = (currentPage.value * pageSize.value) + pageSize.value;
+  return totalElements.value > to ? to : totalElements.value;
+});
 </script>
 
 <template>
   <div class="table-container">
     <template v-if="pageable">
       <div class="table-header">
-        <small class="legend">
-          Total de registros encontrados:
-          <span class="badge">{{ totalElements }}</span>
-        </small>
-        <select v-model="selectedSize" class="select" @change="emit('pageSizeChange', selectedSize)">
-          <option :value="10" :selected="false">10</option>
-          <option :value="25" :selected="false">25</option>
-          <option :value="50" :selected="true">50</option>
-          <option :value="100" :selected="false">100</option>
-        </select>
+        <slot name="header">
+          <div></div>
+        </slot>
+
+        <div class="field inline pageSizeSelector">
+          <label for="pageSize">Itens por página</label>
+          <select
+            id="pageSize"
+            v-model="selectedSize"
+            class="select items-end"
+            @change="emit('pageSizeChange', selectedSize)">
+            <option :value="10" :selected="false">10</option>
+            <option :value="25" :selected="false">25</option>
+            <option :value="50" :selected="true">50</option>
+            <option :value="100" :selected="false">100</option>
+          </select>
+        </div>
       </div>
     </template>
     <table class="table">
@@ -125,12 +141,16 @@ watch(pageSize, (newValue) => {
               sortable: col.sortable
             }
           ]">
-          {{ col.label }}
-          <template v-if="col.sortable === true">
-            <i-mdi-menu-up v-if="col.sortedBy === sortedBy.ASC" class="sort-icon"/>
-            <i-mdi-menu-down v-else-if="col.sortedBy === sortedBy.DSC" class="sort-icon"/>
-            <i-mdi-menu-swap v-else class="sort-icon"/>
-          </template>
+          <span class="wrapper">
+            <span class="text">
+              {{ col.label }}
+            </span>
+            <template v-if="col.sortable === true">
+              <i-mdi-menu-up v-if="col.sortedBy === sortedBy.ASC" class="sort-icon"/>
+              <i-mdi-menu-down v-else-if="col.sortedBy === sortedBy.DESC" class="sort-icon"/>
+              <i-mdi-menu-swap v-else class="sort-icon"/>
+            </template>
+          </span>
         </th>
       </tr>
       </thead>
@@ -155,9 +175,9 @@ watch(pageSize, (newValue) => {
       </tfoot>
     </table>
     <div v-if="showPagination" class="pageable">
-      <small class="legend">
-        Página {{ currentPage + 1 }} de {{ totalPages }} <br/>
-      </small>
+      <p class="legend">
+        Apresentando {{ fromElement }} - {{ toElement }} de {{ totalElements }}
+      </p>
 
       <ul class="pagination">
         <li class="page first">
@@ -195,8 +215,10 @@ watch(pageSize, (newValue) => {
   .table-header {
     @apply flex flex-row justify-between items-end;
 
-    .select {
-      @apply mb-1 w-18;
+    .pageSizeSelector {
+      .select {
+        @apply mb-1 w-18 self-end;
+      }
     }
   }
 
@@ -218,6 +240,14 @@ watch(pageSize, (newValue) => {
 
           &.sortable {
             @apply cursor-pointer;
+          }
+
+          > .wrapper {
+            @apply flex flex-row justify-between items-center;
+
+            .text {
+              @apply flex-grow;
+            }
           }
         }
       }
@@ -267,16 +297,18 @@ watch(pageSize, (newValue) => {
   }
 
   .pageable {
-    @apply flex flex-row justify-between items-center;
+    @apply flex flex-row justify-between items-center mt-2;
+
+    .legend {
+      @apply text-sm text-gray-600;
+    }
 
     .pagination {
-      @apply flex flex-row mt-4;
+      @apply flex flex-row shadow rounded-lg;
 
       .page {
-        @apply mx-1;
-
         button {
-          @apply h-8 min-w-8 border rounded flex flex-col items-center justify-center;
+          @apply h-7 min-w-7 border flex flex-col items-center justify-center text-gray-700 text-xs;
 
           &:disabled {
             @apply bg-gray-200 bg-opacity-10 text-gray-400 cursor-not-allowed shadow-inner;
@@ -285,7 +317,18 @@ watch(pageSize, (newValue) => {
 
         &.active {
           button {
-            @apply bg-light-blue-500 text-white;
+            @apply bg-light-blue-500 text-white border-light-blue-500;
+          }
+        }
+
+        &.first {
+          button {
+            @apply rounded-l-lg pl-0.5;
+          }
+        }
+        &.last {
+          button {
+            @apply rounded-r-lg pr-0.5;
           }
         }
       }

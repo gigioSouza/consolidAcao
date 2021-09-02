@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api/tauri';
 
-export class Broker {
-  id: number|null = null;
-  name: string|null = null;
+export interface Broker {
+  id: number
+  name: string
 }
 
 export function newBroker(brokerName: string): Promise<Broker> {

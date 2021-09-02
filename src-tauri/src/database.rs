@@ -1,5 +1,6 @@
 use rusqlite;
 use tauri::InvokeError;
+
 use crate::config;
 
 const CANT_OPEN_DB_FILE: &str = "CANT_OPEN_DB_FILE";

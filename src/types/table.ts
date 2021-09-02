@@ -10,22 +10,15 @@ export enum SortedBy {
   DESC = 'DESC'
 }
 
-export class PageRequest {
+export interface PageRequest {
   page: number;
   size: number;
-  sortBy: string;
+  sort_by: string;
   direction?: string;
-
-  constructor(page = 0, size = 10, sortyBy: string, direction?: string) {
-    this.page = page;
-    this.size = size;
-    this.sortBy = sortyBy;
-    this.direction = direction;
-  }
 }
 
 export interface PageResponse<T> {
   content: T[],
-  totalPages: number,
-  totalElements: number
+  total_pages: number,
+  total_elements: number
 }

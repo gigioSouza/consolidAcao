@@ -22,8 +22,8 @@ function dateFromISO(date: string | Date, format = 'dd/LL/yyyy') {
   return ldate.toFormat(format);
 }
 
-function orderType(type: OrderType) {
-  return type === OrderType.BUY ? 'Compra' : 'Venda';
+function orderType(order_type: OrderType) {
+  return order_type === OrderType.BUY ? 'Compra' : 'Venda';
 }
 
 function toMoney(value: string|number): string {

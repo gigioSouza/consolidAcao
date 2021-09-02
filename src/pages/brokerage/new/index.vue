@@ -1,5 +1,4 @@
 <route>
-path: new
 name: brokerage-new
 meta:
   title: Nova Nota de Corretagem
@@ -7,14 +6,14 @@ meta:
 </route>
 
 <script lang="ts" setup>
-import { useBroker } from './composables/broker';
+import { useBrokers } from '../../../composables/brokers';
 import { useNote } from './composables/note';
 import { OrderType } from '../../../tauri/brokerage';
 import { Ref, ref } from 'vue';
 import { Column } from '../../../types/table';
 
 const symbolRef = ref(null);
-const { brokers } = useBroker();
+const { brokers } = useBrokers();
 const {
   $note,
   cancelNote,
@@ -31,7 +30,7 @@ const orderType = OrderType;
 
 const columns: Ref<Column[]> = ref([
   {
-    prop: 'type',
+    prop: 'order_type',
     label: 'Tipo de Ordem',
     class: 'type'
   },
@@ -46,7 +45,7 @@ const columns: Ref<Column[]> = ref([
     class: 'amount'
   },
   {
-    prop: 'orderValue',
+    prop: 'order_value',
     label: 'Valor Total',
     class: 'orderValue'
   },
@@ -64,25 +63,18 @@ function goToPage(newPage: number) {
 </script>
 
 <template>
-  <HeaderSlot>
-    <button type="button" class="button cancel" @click="cancelNote">Cancelar</button>
-    <button type="button" class="button primary ml-2" :disabled="$note.$invalid" @click="saveNote">
-      Salvar <i-mdi-content-save class="icon"/>
-    </button>
-  </HeaderSlot>
-
   <div class="card form-brokerage">
     <div class="field">
       <label for="broker">Corretora</label>
       <select id="broker" v-model="$note.broker.$model" class="select">
-        <option :value="undefined" selected disabled>Selecione</option>
+        <option :value="null" selected disabled>Selecione</option>
         <option v-for="broker in brokers" :key="broker.id" :value="broker">{{ broker.name }}</option>
       </select>
     </div>
 
     <div class="field">
       <label for="tradingDate">Data Pregão</label>
-      <input id="tradingDate" type="date" v-model="$note.tradingDate.$model" class="input"/>
+      <input id="tradingDate" type="date" v-model="$note.trading_date.$model" class="input"/>
     </div>
 
     <div class="field">
@@ -90,7 +82,7 @@ function goToPage(newPage: number) {
       <money
         id="totalSettlementFee"
         type="text"
-        v-model.number="$note.totalSettlementFee.$model"
+        v-model.number="$note.total_settlement_fee.$model"
         class="input"
         v-bind="$configs.vMoney"/>
     </div>
@@ -100,7 +92,7 @@ function goToPage(newPage: number) {
       <money
         id="totalEmolumentFee"
         type="text"
-        v-model.number="$note.totalEmolumentFee.$model"
+        v-model.number="$note.total_emolument_fee.$model"
         class="input"
         v-bind="$configs.vMoney"/>
     </div>
@@ -110,7 +102,7 @@ function goToPage(newPage: number) {
       <money
         id="totalBrokerFee"
         type="text"
-        v-model.number="$note.totalBrokerFee.$model"
+        v-model.number="$note.total_broker_fee.$model"
         class="input"
         v-bind="$configs.vMoney"/>
     </div>
@@ -120,7 +112,7 @@ function goToPage(newPage: number) {
       <money
         id="totalIssTax"
         type="text"
-        v-model.number="$note.totalIssTax.$model"
+        v-model.number="$note.total_iss_tax.$model"
         class="input"
         v-bind="$configs.vMoney"/>
     </div>
@@ -132,11 +124,11 @@ function goToPage(newPage: number) {
         <label>Tipo de Ordem</label>
         <div class="radio-group inline">
           <label for="orderTypeBuy" class="radio">
-            <input id="orderTypeBuy" type="radio" v-model="$order.type.$model" :value="orderType.BUY"/>
+            <input id="orderTypeBuy" type="radio" v-model="$order.order_type.$model" :value="orderType.BUY"/>
             Compra
           </label>
           <label for="orderTypeSell" class="radio">
-            <input id="orderTypeSell" type="radio" v-model="$order.type.$model" :value="orderType.SELL"/>
+            <input id="orderTypeSell" type="radio" v-model="$order.order_type.$model" :value="orderType.SELL"/>
             Venda
           </label>
         </div>
@@ -157,7 +149,7 @@ function goToPage(newPage: number) {
         <money
           id="orderValue"
           type="text"
-          v-model.number="$order.orderValue.$model"
+          v-model.number="$order.order_value.$model"
           class="input"
           v-bind="$configs.vMoney"/>
       </div>
@@ -176,13 +168,20 @@ function goToPage(newPage: number) {
       :items="$note.orders.$model"
       empty-message="Adicione ordens através do formulário acima.">
       <template #item="{ item, index }">
-        <td class="orderType">{{ $filters.orderType(item.type) }}</td>
-        <td class="symbol">{{ item.symbol }}</td>
+        <td class="orderType">
+          <select v-model="item.order_type" class="select">
+            <option :value="orderType.BUY">Compra</option>
+            <option :value="orderType.SELL">Venda</option>
+          </select>
+        </td>
+        <td class="symbol">
+          <input type="text" v-model="$note.orders.$model[index].symbol" class="input symbol"/>
+        </td>
         <td class="amount">
           <input type="text" v-model.number="item.amount" class="input"/>
         </td>
         <td class="orderValue">
-          <money type="text" v-model.number="item.orderValue" class="input" v-bind="$configs.vMoney"/>
+          <money type="text" v-model.number="item.order_value" class="input" v-bind="$configs.vMoney"/>
         </td>
         <td>
           <button type="button" @click="removeOrder(item)">
@@ -203,6 +202,13 @@ function goToPage(newPage: number) {
     Total Comprado: {{ $filters.toMoney(totalPurchased) }} <br/>
     Total Vendido: {{ $filters.toMoney(totalSold) }}
   </div>
+
+  <HeaderSlot>
+    <button type="button" class="button cancel" @click="cancelNote">Cancelar</button>
+    <button type="button" class="button primary ml-2" :disabled="$note.$invalid" @click="saveNote">
+      Salvar <i-mdi-content-save class="icon"/>
+    </button>
+  </HeaderSlot>
 </template>
 
 <style lang="scss" scoped>

@@ -29,7 +29,11 @@ input {
   @apply flex flex-col;
 
   &.inline {
-    @apply flex-row;
+    @apply flex-row items-center;
+
+    label {
+      @apply mr-2;
+    }
 
     input,
     select,

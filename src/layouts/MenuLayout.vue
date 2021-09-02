@@ -43,16 +43,27 @@ function toggle() {
       </div>
 
       <div class="bottom">
-        <button type="button" class="toggle-button" @click="toggle">
-          <i-mdi-arrow-expand-left class="icon" />
-        </button>
+        <router-link :to="{ name: 'config' }" class="item link" v-tooltip.right="'Configurações'">
+          <div class="content-wrapper">
+            <span class="text">Configurações</span>
+            <i-mdi-cog class="icon"/>
+          </div>
+        </router-link>
+
+        <div class="toggle-button-wrapper">
+          <button type="button" class="toggle-button" @click="toggle">
+            <i-mdi-arrow-expand-left class="icon" />
+          </button>
+        </div>
       </div>
     </nav>
+
     <div class="contentContainer">
       <div class="header">
         <h1 class="title">{{ route.meta.title }}</h1>
         <div id="header-slot"></div>
       </div>
+
       <div class="content">
         <router-view/>
       </div>
@@ -70,78 +81,82 @@ function toggle() {
 
     .top {
       @apply flex flex-col justify-start;
+    }
 
-      .brand,
-      .item {
-        @apply relative px-2 transition-all duration-300;
+    .brand,
+    .item {
+      @apply relative px-2 transition-all duration-300;
 
+      .content-wrapper {
+        @apply relative flex flex-row items-center justify-between text-white cursor-pointer px-2 transition-all duration-300;
+
+        .text, .icon {
+          @apply relative transition-all duration-300;
+        }
+
+        .icon {
+          transition-delay: .1s;
+        }
+      }
+    }
+
+    .brand {
+      @apply mb-4;
+
+      .content-wrapper {
+        @apply pt-2 pb-1 border-b border-white border-opacity-40;
+
+        .text {
+          @apply text-2xl;
+        }
+
+        .icon {
+          @apply w-0 h-0;
+        }
+      }
+    }
+
+    .separator {
+      width: 85%;
+      height: 1px;
+      @apply self-center border-none bg-white bg-opacity-70 my-2;
+    }
+
+    .item {
+      &.router-link-active {
         .content-wrapper {
-          @apply relative flex flex-row items-center justify-between text-white cursor-pointer px-2 transition-all duration-300;
-
-          .text, .icon {
-            @apply relative transition-all duration-300;
-          }
-
-          .icon {
-            transition-delay: .1s;
-          }
+          @apply bg-light-blue-900 shadow-lg;
         }
       }
 
-      .brand {
-        @apply mb-4;
-
+      &:hover:not(&.router-link-active) {
         .content-wrapper {
-          @apply pt-2 pb-1 border-b border-white border-opacity-40;
-
-          .text {
-            @apply text-2xl;
-          }
-
-          .icon {
-            @apply w-0 h-0;
-          }
+          @apply bg-light-blue-500;
         }
       }
 
-      .separator {
-        width: 85%;
-        height: 1px;
-        @apply self-center border-none bg-white bg-opacity-70 my-2;
-      }
+      .content-wrapper {
+        @apply px-2 py-0.5 rounded;
 
-      .item {
-        &.router-link-active {
-          .content-wrapper {
-            @apply bg-light-blue-900 shadow-lg;
-          }
+        .text {
+          @apply text-xl w-4/5 font-light;
         }
 
-        &:hover:not(&.router-link-active) {
-          .content-wrapper {
-            @apply bg-light-blue-500;
-          }
-        }
-
-        .content-wrapper {
-          @apply px-2 py-0.5 rounded;
-
-          .text {
-            @apply text-xl w-4/5 font-light;
-          }
-
-          .icon {
-            @apply text-lg;
-          }
+        .icon {
+          @apply text-lg;
         }
       }
     }
 
     .bottom {
-      @apply flex flex-row justify-end border-t border-light-blue-800;
+      @apply flex flex-col;
 
-      .toggle-button {
-        @apply pr-4 pl-3.5 pt-2 text-2xl text-white block border-l border-light-blue-800;
+      .toggle-button-wrapper {
+        @apply flex flex-row justify-end border-t border-light-blue-800 mt-2;
+
+        .toggle-button {
+          @apply pr-4 pl-3.5 pt-2 text-2xl text-white block border-l border-light-blue-800;
+        }
       }
     }
 
@@ -151,32 +166,34 @@ function toggle() {
 
       .top {
         @apply items-center;
+      }
 
-        .brand,
-        .item {
-          .content-wrapper {
-            @apply py-2;
+      .brand,
+      .item {
+        .content-wrapper {
+          @apply py-2 justify-center;
 
-            .text {
-              @apply hidden;
-            }
+          .text {
+            @apply hidden;
+          }
 
-            .icon {
-              height: unset;
-              width: unset;
-              @apply block text-2xl;
-            }
+          .icon {
+            height: unset;
+            width: unset;
+            @apply block text-2xl;
           }
         }
       }
 
       .bottom {
-        .toggle-button {
-          @apply flex-grow;
+        .toggle-button-wrapper {
+          .toggle-button {
+            @apply flex-grow;
 
-          .icon {
-            animation: collapse-toggle .3s;
-            transform: rotate(180deg);
+            .icon {
+              animation: collapse-toggle .3s;
+              transform: rotate(180deg);
+            }
           }
         }
       }
@@ -186,9 +203,11 @@ function toggle() {
       animation: expand .3s;
 
       .bottom {
-        .toggle-button {
-          .icon {
-            animation: expand-toggle .3s;
+        .toggle-button-wrapper {
+          .toggle-button {
+            .icon {
+              animation: expand-toggle .3s;
+            }
           }
         }
       }

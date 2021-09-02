@@ -1,9 +1,9 @@
-import { computed, reactive, Ref } from 'vue';
-import { BrokerageNote, newBrokerage, newBrokerageNote, OrderType } from '../../../../tauri/brokerage';
-import { minLength, numeric, required } from '@vuelidate/validators';
+import { computed, reactive, Ref, UnwrapRef } from 'vue';
+import { BrokerageNote, newBrokerageNote, OrderType } from '../../../../tauri/brokerage';
+import { helpers, minLength, numeric, required } from '@vuelidate/validators';
 import useVuelidate from '@vuelidate/core';
 import { DateTime } from 'luxon';
-import { useOrder } from './orders';
+import { orderRules, useOrder } from './orders';
 import { useRouter } from 'vue-router';
 import { useGlobalLoader } from '../../../../store/global-loader';
 import { cloneDeep } from 'lodash-es';
@@ -11,10 +11,18 @@ import { cloneDeep } from 'lodash-es';
 const DATE_FORMAT = 'yyyy-LL-dd';
 
 export function useNote(symbolRef: Ref) {
-  const note = reactive(new BrokerageNote());
-  note.tradingDate = DateTime.now().toFormat(DATE_FORMAT);
-
   const loader = useGlobalLoader();
+
+  const note: UnwrapRef<BrokerageNote> = reactive({
+    broker: null,
+    total_settlement_fee: 0,
+    total_emolument_fee: 0,
+    total_broker_fee: 0,
+    total_iss_tax: 0,
+    trading_date: null,
+    orders: []
+  });
+  note.trading_date = DateTime.now().toFormat(DATE_FORMAT);
 
   const $note = useVuelidate(noteRules(), note);
 
@@ -30,7 +38,7 @@ export function useNote(symbolRef: Ref) {
     try {
       loader.show();
       const brokerageNote = cloneDeep(note);
-      brokerageNote.tradingDate = DateTime.fromFormat(brokerageNote.tradingDate!, DATE_FORMAT).toISO();
+      brokerageNote.trading_date = DateTime.fromFormat(brokerageNote.trading_date!, DATE_FORMAT).toISO();
       await newBrokerageNote(brokerageNote);
       cancelNote();
     } catch (error) {
@@ -43,8 +51,8 @@ export function useNote(symbolRef: Ref) {
 
   const totalPurchased = computed(() => {
     return note.orders.reduce((sum, order) => {
-      if (OrderType.BUY === order.type) {
-        return sum + order.orderValue;
+      if (OrderType.BUY === order.order_type) {
+        return sum + order.order_value;
       }
       return sum;
     }, 0);
@@ -52,8 +60,8 @@ export function useNote(symbolRef: Ref) {
 
   const totalSold = computed(() => {
     return note.orders.reduce((sum, order) => {
-      if (OrderType.SELL === order.type) {
-        return sum + order.orderValue;
+      if (OrderType.SELL === order.order_type) {
+        return sum + order.order_value;
       }
       return sum;
     }, 0);
@@ -79,28 +87,29 @@ function noteRules() {
     broker: {
       required
     },
-    totalSettlementFee: {
+    total_settlement_fee: {
       required,
       numeric
     },
-    totalEmolumentFee: {
+    total_emolument_fee: {
       required,
       numeric
     },
-    totalBrokerFee: {
+    total_broker_fee: {
       required,
       numeric
     },
-    totalIssTax: {
+    total_iss_tax: {
       required,
       numeric
     },
-    tradingDate: {
+    trading_date: {
       required
     },
     orders: {
       required,
-      minLength: minLength(1)
+      minLength: minLength(1),
+      $each: helpers.forEach(orderRules())
     }
   }
 }
