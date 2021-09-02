@@ -1,11 +1,12 @@
-use rusqlite::{named_params, MappedRows};
+use rusqlite::{named_params};
 use tauri::InvokeError;
 
 use crate::broker;
 use crate::brokerage_note::{Brokerage, BrokerageOrder};
 use crate::commons::page::PageRequest;
+use crate::commons::{ToVec, QueryMapper};
 
-const BROKERAGE_MAPPER: fn(&rusqlite::Row) -> rusqlite::Result<Brokerage> = |row: &rusqlite::Row| {
+const BROKERAGE_MAPPER: QueryMapper<Brokerage> = |row| {
     Ok(Brokerage {
         id: row.get(0)?,
         broker: broker::Broker {
@@ -25,7 +26,7 @@ const BROKERAGE_MAPPER: fn(&rusqlite::Row) -> rusqlite::Result<Brokerage> = |row
     })
 };
 
-const BROKERAGE_ORDER_MAPPER: fn(&rusqlite::Row) -> rusqlite::Result<BrokerageOrder> = |row| {
+const BROKERAGE_ORDER_MAPPER: QueryMapper<BrokerageOrder> = |row| {
     Ok(BrokerageOrder {
         id: row.get(0)?,
         order_type: row.get(1)?,
@@ -121,29 +122,6 @@ pub(crate) fn select_brokerage_note_page_by_broker(connection: &rusqlite::Connec
     ).map_err(|error| InvokeError::from(format!("{}", error)))?;
 
     Ok(brokerage_rows.to_vec())
-}
-
-trait ToVec<T> {
-    fn to_vec(self) -> Vec<T>;
-}
-
-impl<T> ToVec<T> for MappedRows<'_, fn(&rusqlite::Row) -> rusqlite::Result<T>> {
-    fn to_vec(self) -> Vec<T> {
-        let mut list = Vec::new();
-        for row in self {
-            list.push(row.unwrap());
-        }
-        list
-    }
-}
-
-fn mapped_rows_to_vec<T, U>(mapped_rows: MappedRows<T>) -> Vec<U>
-    where T: Fn(&rusqlite::Row) -> rusqlite::Result<U> {
-    let mut list = Vec::new();
-    for row in mapped_rows {
-        list.push(row.unwrap());
-    }
-    list
 }
 
 pub(crate) fn count_total_brokerage(connection: &rusqlite::Connection) -> Result<i64, InvokeError> {

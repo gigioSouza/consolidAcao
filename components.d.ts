@@ -3,6 +3,7 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
+    BrokerageNoteForm: typeof import('./src/components/brokerage/BrokerageNoteForm.vue')['default']
     CTable: typeof import('./src/components/CTable.vue')['default']
     GlobalLoader: typeof import('./src/components/GlobalLoader.vue')['default']
     HeaderSlot: typeof import('./src/components/HeaderSlot.vue')['default']

@@ -3,12 +3,20 @@ use serde::{Deserialize, Serialize};
 use tauri::InvokeError;
 
 use crate::database;
+use crate::commons::{ToVec, QueryMapper};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct Broker {
     pub(crate) id: i64,
     pub(crate) name: String,
 }
+
+const BROKER_MAPPER: QueryMapper<Broker> = |row| {
+    Ok(Broker {
+        id: row.get(0)?,
+        name: row.get(1)?,
+    })
+};
 
 #[tauri::command(async)]
 pub(crate) fn get_broker_list() -> Result<Vec<Broker>, InvokeError> {
@@ -18,22 +26,11 @@ pub(crate) fn get_broker_list() -> Result<Vec<Broker>, InvokeError> {
         .map_err(|error| InvokeError::from(format!("{}", error)))?;
 
 
-    let broker_rows = statement.query_map([], |row| {
-        Ok(Broker {
-            id: row.get(0)?,
-            name: row.get(1)?,
-        })
-    });
-
-    let broker_rows = broker_rows
+    let broker_rows = statement
+        .query_map([], BROKER_MAPPER)
         .map_err(|error| InvokeError::from(format!("{}", error)))?;
 
-    let mut broker_list = Vec::new();
-    for broker in broker_rows {
-        broker_list.push(broker.unwrap());
-    }
-
-    Ok(broker_list)
+    Ok(broker_rows.to_vec())
 }
 
 #[tauri::command(async)]
