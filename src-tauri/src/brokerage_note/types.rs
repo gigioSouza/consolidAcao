@@ -64,6 +64,10 @@ impl BrokerageNote {
             .reduce(|sum, value| sum + value)
             .unwrap();
 
+        self.brokerage.total_purchased = 0 as f64;
+        self.brokerage.total_sold = 0 as f64;
+        self.brokerage.total_income_tax = 0 as f64;
+
         let order_broker_fee = self.brokerage.total_broker_fee / self.orders.len() as f64;
         let order_iss_tax = self.brokerage.total_iss_tax / self.orders.len() as f64;
         let settlement_coefficient = self.brokerage.total_settlement_fee / self.brokerage.total_transacted;

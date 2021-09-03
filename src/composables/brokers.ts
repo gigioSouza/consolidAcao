@@ -1,6 +1,6 @@
 import { onMounted, ref, Ref } from 'vue';
 import { Broker, getBrokerList } from '../tauri/brokers';
-import { useGlobalLoader } from '../store/global-loader';
+import { useGlobalLoader } from '../store/global-loader.store';
 
 const loader = useGlobalLoader();
 

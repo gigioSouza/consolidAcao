@@ -7,7 +7,7 @@ onMounted(() => isMounted.value = true);
 </script>
 
 <template>
-  <teleport v-if="isMounted" to="body #app .layout .contentContainer .header #header-slot">
+  <teleport v-if="isMounted" to="#header-slot">
     <slot/>
   </teleport>
 </template>

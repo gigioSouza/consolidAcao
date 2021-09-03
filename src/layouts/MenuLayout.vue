@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router';
-import { useMenu } from '../store/menu';
+import { useMenu } from '../store/menu.store';
 
 const route = useRoute();
 const menu = useMenu();
@@ -21,14 +21,14 @@ function toggle() {
         <router-link :to="{ name: 'home' }" class="brand link">
           <div class="content-wrapper">
             <span class="text">ConsolidAção</span>
-            <i-icon-park-outline-stock-market class="icon"/>
+            <icon-icon-park-outline-stock-market class="icon"/>
           </div>
         </router-link>
 
         <router-link :to="{ name: 'brokers' }" class="item link" v-tooltip.right="'Corretoras'">
           <div class="content-wrapper">
             <span class="text">Corretoras</span>
-            <i-mdi-bank class="icon"/>
+            <icon-mdi-bank class="icon"/>
           </div>
         </router-link>
 
@@ -37,7 +37,7 @@ function toggle() {
         <router-link :to="{ name: 'brokerage-list' }" class="item link" v-tooltip.right="'Corretagem'">
           <div class="content-wrapper">
             <span class="text">Corretagem</span>
-            <i-uil-bill class="icon"/>
+            <icon-uil-bill class="icon"/>
           </div>
         </router-link>
       </div>
@@ -46,13 +46,13 @@ function toggle() {
         <router-link :to="{ name: 'config' }" class="item link" v-tooltip.right="'Configurações'">
           <div class="content-wrapper">
             <span class="text">Configurações</span>
-            <i-mdi-cog class="icon"/>
+            <icon-mdi-cog class="icon"/>
           </div>
         </router-link>
 
         <div class="toggle-button-wrapper">
           <button type="button" class="toggle-button" @click="toggle">
-            <i-mdi-arrow-expand-left class="icon" />
+            <icon-mdi-arrow-expand-left class="icon" />
           </button>
         </div>
       </div>

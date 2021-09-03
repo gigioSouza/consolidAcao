@@ -14,7 +14,7 @@ import {
   openDataDirSelectionDialog,
   createConfigFile
 } from '../tauri/config-file';
-import { useConfig } from '../store/config';
+import { useConfig } from '../store/config.store';
 
 enum WelcomeState {
   NEW_USER,
@@ -86,7 +86,7 @@ async function createNewDatabase() {
       <h1 class="banner">
         Bem-vindo ao ConsolidAção
       </h1>
-      <i-eos-icons-loading v-if="loading" class="loader animate-spin" />
+      <icon-eos-icons-loading v-if="loading" class="loader animate-spin" />
       <div v-else class="prompt">
         <template v-if="state === WelcomeState.NEW_USER">
           <p>
@@ -100,7 +100,7 @@ async function createNewDatabase() {
             class="choose-data-dir"
             @click="chooseDataDir">
             Selecionar diretório
-            <i-mdi-folder-search class="icon"/>
+            <icon-mdi-folder-search class="icon"/>
           </button>
         </template>
 
@@ -113,7 +113,7 @@ async function createNewDatabase() {
               class="choose-data-dir"
               @click="chooseDataDir">
               Selecionar diretório
-              <i-mdi-folder-search class="icon"/>
+              <icon-mdi-folder-search class="icon"/>
             </button>
 
             <button
@@ -121,7 +121,7 @@ async function createNewDatabase() {
               class="confirm-data-dir"
               @click="confirmDataDir">
               Confirmar
-              <i-mdi-check class="icon"/>
+              <icon-mdi-check class="icon"/>
             </button>
           </div>
         </template>

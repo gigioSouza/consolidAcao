@@ -7,7 +7,7 @@ meta:
 </route>
 
 <script lang="ts" setup>
-import { useGlobalLoader } from '../store/global-loader';
+import { useGlobalLoader } from '../store/global-loader.store';
 import { onMounted, Ref, ref } from 'vue';
 import { Broker, getBrokerList, newBroker, updateBroker } from '../tauri/brokers';
 
@@ -75,8 +75,19 @@ async function fetchBrokers() {
       </div>
 
       <div class="actions">
-        <button type="reset" class="cancel">Cancelar</button>
-        <button class="save">Salvar</button>
+        <Button
+          reset
+          variant="light"
+          class="mr-2">
+          Cancelar
+        </Button>
+
+        <Button
+          submit
+          variant="primary"
+          icon="save">
+          Salvar
+        </Button>
       </div>
     </form>
 
@@ -114,16 +125,7 @@ async function fetchBrokers() {
     }
 
     .actions {
-      button {
-        @apply outline-none rounded px-3 py-1 mx-1;
-      }
-
-      .cancel {
-        @apply bg-cool-gray-500 text-white;
-      }
-      .save {
-        @apply bg-emerald-500 text-white;
-      }
+      @apply flex flex-row;
     }
   }
 

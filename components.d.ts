@@ -3,7 +3,7 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
-    BrokerageNoteForm: typeof import('./src/components/brokerage/BrokerageNoteForm.vue')['default']
+    BrokerageNoteForm: typeof import('./src/components/brokerage/brokerage-form/BrokerageNoteForm.vue')['default']
     CTable: typeof import('./src/components/CTable.vue')['default']
     GlobalLoader: typeof import('./src/components/GlobalLoader.vue')['default']
     HeaderSlot: typeof import('./src/components/HeaderSlot.vue')['default']
@@ -30,6 +30,7 @@ declare module 'vue' {
     IMdiTrashCan: typeof import('virtual:vite-icons/mdi/trash-can')['default']
     IUilBill: typeof import('virtual:vite-icons/uil/bill')['default']
     Table: typeof import('./src/components/Table.vue')['default']
+    ValidateEach: typeof import('./src/components/ValidateEach.vue')['default']
   }
 }
 

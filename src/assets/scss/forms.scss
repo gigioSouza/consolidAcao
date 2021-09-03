@@ -7,11 +7,11 @@
 .input,
 .select {
   height: 28px;
-  @apply bg-white border rounded px-2 pt-0.5 text-black border-blue-gray-200 outline-none text-base;
+  @apply w-full bg-white border rounded px-2 pt-0.5 text-black border-blue-gray-200 outline-none text-base;
   @include form_focus();
 }
 
-input {
+.input {
   &.v-money3 {
     @apply text-right;
   }

@@ -1,4 +1,3 @@
-use rusqlite::named_params;
 use tauri::InvokeError;
 
 use crate::brokerage_note::types::{Brokerage, BrokerageNote, BrokerageOrder};
@@ -45,25 +44,37 @@ pub(crate) fn new_brokerage_note(mut brokerage_note: BrokerageNote) -> Result<()
 }
 
 #[tauri::command(async)]
-pub(crate) fn update_brokerage_note(mut brokerage_note: BrokerageNote) {
+pub(crate) fn update_brokerage_note(mut brokerage_note: BrokerageNote) -> Result<BrokerageNote, InvokeError> {
     brokerage_note.calc();
-}
 
-#[tauri::command(async)]
-pub(crate) fn delete_brokerage_note(brokerage_note_id: i64) -> Result<(), InvokeError> {
     let mut connection = database::get_connection()?;
 
     let transaction = connection.transaction()
         .map_err(|error| InvokeError::from(format!("{}", error)))?;
 
-    db::delete_brokerage_orders(&transaction, &brokerage_note_id)?;
+    db::update_brokerage(&transaction, &brokerage_note.brokerage)?;
 
-    let mut delete_note = transaction.prepare("DELETE FROM nota_corretagem WHERE id = :brokerage_note_id")
-        .map_err(|error| InvokeError::from(format!("{}", error)))?;
-    delete_note.execute(named_params! { ":id": brokerage_note_id })
+    db::delete_brokerage_orders(&transaction, &brokerage_note.brokerage.id)?;
+    db::insert_new_brokerage_orders(&transaction, &brokerage_note.brokerage.id, &brokerage_note.orders)?;
+
+    transaction.commit()
+        .map_err(|error| InvokeError::from(format!("{}", error)));
+
+    get_brokerage_note(brokerage_note.brokerage.id)
+}
+
+#[tauri::command(async)]
+pub(crate) fn delete_brokerage_note(brokerage_id: i64) -> Result<(), InvokeError> {
+    let mut connection = database::get_connection()?;
+
+    let transaction = connection.transaction()
         .map_err(|error| InvokeError::from(format!("{}", error)))?;
 
-    Ok(())
+    db::delete_brokerage_orders(&transaction, &brokerage_id)?;
+    db::delete_brokerage(&transaction, &brokerage_id)?;
+
+    transaction.commit()
+        .map_err(|error| InvokeError::from(format!("{}", error)))
 }
 
 #[tauri::command(async)]

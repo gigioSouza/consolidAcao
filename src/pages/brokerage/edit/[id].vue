@@ -6,18 +6,61 @@ meta:
 </route>
 
 <script lang="ts" setup>
-import { useRoute } from 'vue-router';
-import { useNote } from './composables/note';
+import { onMounted, onUnmounted } from 'vue';
+import { useBrokerage } from '../../../store/brokerage.store';
+import { useRoute, useRouter } from 'vue-router';
+import useVuelidate from '@vuelidate/core';
 
 const route = useRoute();
-const { note } = useNote(+route.params.id);
+const store = useBrokerage();
+onMounted(() => store.fetchBrokerageNote(+route.params.id));
+onUnmounted(() => store.$reset());
+
+const v = useVuelidate({ $stopPropagation: true });
+
+const router = useRouter();
+async function saveBrokerageNote() {
+  await store.updateBrokerageNote();
+}
+async function deleteBrokerageNote() {
+  await store.deleteBrokerageNote();
+  router.push({
+    name: 'brokerage-list'
+  });
+}
 </script>
 
 <template>
-  <div>
-    <h1>{{ route.params.id }}</h1>
-    <pre>{{ note }}</pre>
+  <BrokerageNoteForm />
+
+  <div
+    v-if="store.totalTransacted > 0"
+    class="card">
+    Total Comprado: {{ $filters.toMoney(store.totalPurchased) }} <br />
+    Total Vendido: {{ $filters.toMoney(store.totalSold) }}
   </div>
+
+  <HeaderSlot>
+    <Button
+      variant="light"
+      @click="router.back()">
+      Voltar
+    </Button>
+    <Button
+      variant="danger"
+      class="mx-2"
+      icon="delete"
+      @click="deleteBrokerageNote">
+      Excluir
+    </Button>
+    <Button
+      variant="primary"
+      icon="save"
+      :disabled="v.$invalid"
+      @click="saveBrokerageNote">
+      Salvar
+    </Button>
+  </HeaderSlot>
 </template>
 
 <style scoped>

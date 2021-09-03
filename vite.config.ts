@@ -3,8 +3,9 @@ import Vue from '@vitejs/plugin-vue';
 import Pages from 'vite-plugin-pages';
 import Layouts from 'vite-plugin-vue-layouts';
 import WindiCSS from 'vite-plugin-windicss';
-import Components from 'vite-plugin-components';
-import Icons, { ViteIconsResolver } from 'vite-plugin-icons';
+import Components from 'unplugin-vue-components/vite';
+import Icons from 'unplugin-icons/vite';
+import IconsResolver from 'unplugin-icons/resolver';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -29,8 +30,11 @@ export default defineConfig({
       transformCSS: 'pre'
     }),
     Components({
-      customComponentResolvers: ViteIconsResolver(),
-      globalComponentsDeclaration: true
+      resolvers: [
+        IconsResolver({
+          componentPrefix: 'icon'
+        })
+      ],
     }),
     Icons()
   ],

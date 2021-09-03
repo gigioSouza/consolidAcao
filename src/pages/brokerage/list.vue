@@ -8,7 +8,7 @@ meta:
 <script lang="ts" setup>
 import { Column, SortedBy } from '../../types/table';
 import { onMounted, ref, Ref } from 'vue';
-import { useGlobalLoader } from '../../store/global-loader';
+import { useGlobalLoader } from '../../store/global-loader.store';
 import { Brokerage, getBrokerageNotePage } from '../../tauri/brokerage';
 import { useBrokers } from '../../composables/brokers';
 import { usePageable } from '../../composables/pageable';
@@ -66,7 +66,7 @@ function onBrokerChange() {
 
 function onItemClick({ item }) {
   router.push({
-    name: 'brokerage-edit',
+    name: 'brokerage-view',
     params: {
       id: item.id
     }
@@ -106,7 +106,7 @@ const columns: Ref<Column[]> = ref([
 
 <template>
   <HeaderSlot>
-    <router-link :to="{ name: 'brokerage-new' }" class="button primary">Nova <i-mdi-plus class="icon"/></router-link>
+    <router-link :to="{ name: 'brokerage-new' }" class="button primary">Nova <icon-mdi-plus class="icon"/></router-link>
   </HeaderSlot>
 
   <div class="card">

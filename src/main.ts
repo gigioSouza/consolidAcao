@@ -8,8 +8,6 @@ import filters from './config/filters';
 import money from './config/money';
 import { loadConfigFile } from './config/config-file';
 
-
-
 const app = createApp(App);
 app.use(router);
 app.use(createPinia());

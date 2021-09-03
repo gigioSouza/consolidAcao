@@ -8,8 +8,8 @@ meta:
 <script lang="ts" setup>
 import { ref, Ref } from 'vue';
 import { AppConfig } from '../tauri/config-file';
-import { useGlobalLoader } from '../store/global-loader';
-import { useConfig } from '../store/config';
+import { useGlobalLoader } from '../store/global-loader.store';
+import { useConfig } from '../store/config.store';
 import { cloneDeep } from 'lodash-es';
 
 const loader = useGlobalLoader();
@@ -48,7 +48,7 @@ async function saveConfig() {
 
   <HeaderSlot>
     <button type="button" class="button primary" @click="saveConfig">
-      Salvar <i-mdi-content-save class="icon"/>
+      Salvar <icon-mdi-content-save class="icon"/>
     </button>
   </HeaderSlot>
 </template>

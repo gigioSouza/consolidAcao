@@ -5,6 +5,7 @@ use crate::broker;
 use crate::brokerage_note::{Brokerage, BrokerageOrder};
 use crate::commons::page::PageRequest;
 use crate::commons::{ToVec, QueryMapper};
+use std::error::Error;
 
 const BROKERAGE_MAPPER: QueryMapper<Brokerage> = |row| {
     Ok(Brokerage {
@@ -206,7 +207,48 @@ pub(crate) fn insert_new_brokerage(transaction: &rusqlite::Transaction, brokerag
     }).map_err(|error| InvokeError::from(format!("{}", error)))
 }
 
-pub(crate) fn insert_new_brokerage_orders(transaction: &rusqlite::Transaction, brokerage_note_id: &i64, brokerage_orders: &Vec<BrokerageOrder>) -> Result<(), InvokeError> {
+pub(crate) fn update_brokerage(transaction: &rusqlite::Transaction, brokerage: &Brokerage) -> Result<(), InvokeError> {
+    let mut brokerage_statement = transaction.prepare(
+    "UPDATE nota_corretagem SET
+            corretora_id = :broker_id,
+            total_taxa_liquidacao = :total_settlement_fee,
+            total_emolumentos = :total_emolument_fee,
+            total_corretagem = :total_broker_fee,
+            total_iss = :total_iss_tax,
+            total_irrf = :total_income_tax,
+            total_custo = :total_cost,
+            total_transacionado = :total_transacted,
+            total_comprado = :total_purchased,
+            total_vendido = :total_sold,
+            data_pregao = :trading_date
+        WHERE id = :id"
+    ).map_err(|error| {
+        println!("Preparing statement {}", error);
+        InvokeError::from(format!("{}", error))
+    })?;
+
+    brokerage_statement.execute(named_params! {
+        ":broker_id": &brokerage.broker.id,
+        ":total_settlement_fee": &brokerage.total_settlement_fee,
+        ":total_emolument_fee": &brokerage.total_emolument_fee,
+        ":total_broker_fee": &brokerage.total_broker_fee,
+        ":total_iss_tax": &brokerage.total_iss_tax,
+        ":total_income_tax": &brokerage.total_income_tax,
+        ":total_cost": &brokerage.total_cost,
+        ":total_transacted": &brokerage.total_transacted,
+        ":total_purchased": &brokerage.total_purchased,
+        ":total_sold": &brokerage.total_sold,
+        ":trading_date": &brokerage.trading_date,
+        ":id": &brokerage.id
+    }).map_err(|error| {
+        println!("Executing statement {}", error);
+        InvokeError::from(format!("{}", error))
+    })?;
+
+    Ok(())
+}
+
+pub(crate) fn insert_new_brokerage_orders(transaction: &rusqlite::Transaction, brokerage_id: &i64, brokerage_orders: &Vec<BrokerageOrder>) -> Result<(), InvokeError> {
     let mut brokerage_order_statement = transaction.prepare(
         "INSERT INTO nota_corretagem_ordem (
             nota_corretagem_id,
@@ -222,7 +264,7 @@ pub(crate) fn insert_new_brokerage_orders(transaction: &rusqlite::Transaction, b
             irrf,
             total_custo
         ) VALUES (
-            :brokerage_note_id,
+            :brokerage_id,
             :order_type,
             :symbol,
             :amount,
@@ -239,7 +281,7 @@ pub(crate) fn insert_new_brokerage_orders(transaction: &rusqlite::Transaction, b
 
     for order in brokerage_orders {
         brokerage_order_statement.insert(named_params! {
-            ":brokerage_note_id": brokerage_note_id,
+            ":brokerage_id": brokerage_id,
             ":order_type": order.order_type,
             ":symbol": order.symbol,
             ":amount": order.amount,
@@ -257,12 +299,23 @@ pub(crate) fn insert_new_brokerage_orders(transaction: &rusqlite::Transaction, b
     Ok(())
 }
 
-pub(crate) fn delete_brokerage_orders(transaction: &rusqlite::Transaction, brokerage_note_id: &i64) -> Result<(), InvokeError> {
-    let mut delete_orders = transaction.prepare("DELETE FROM nota_corretagem_ordem WHERE nota_corretagem_id = :brokerage_note_id")
+pub(crate) fn delete_brokerage_orders(transaction: &rusqlite::Transaction, brokerage_id: &i64) -> Result<(), InvokeError> {
+    let mut statement = transaction.prepare("DELETE FROM nota_corretagem_ordem WHERE nota_corretagem_id = :brokerage_id")
         .map_err(|error| InvokeError::from(format!("{}", error)))?;
 
-    delete_orders.execute(named_params! { ":brokerage_note_id": brokerage_note_id })
+    statement.execute(named_params! { ":brokerage_id": brokerage_id })
         .map_err(|error| InvokeError::from(format!("{}", error)))?;
+
+    Ok(())
+}
+
+pub(crate) fn delete_brokerage(transaction: &rusqlite::Transaction, brokerage_id: &i64) -> Result<(), InvokeError> {
+    let mut statement = transaction.prepare("DELETE FROM nota_corretagem WHERE id = :brokerage_id")
+        .map_err(|error| InvokeError::from(format!("{}", error)))?;
+
+    statement.execute(named_params! {
+            ":brokerage_id": brokerage_id
+    }).map_err(|error| InvokeError::from(format!("{}", error)))?;
 
     Ok(())
 }

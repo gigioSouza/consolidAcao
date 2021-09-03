@@ -1,12 +1,12 @@
 <script setup>
-import { useGlobalLoader } from '../store/global-loader';
+import { useGlobalLoader } from '../store/global-loader.store';
 
 const store = useGlobalLoader();
 </script>
 
 <template>
 <div class="wrapper" v-if="store.isLoading">
-  <i-eos-icons-loading class="loader animate-spin" />
+  <icon-eos-icons-loading class="loader animate-spin" />
 </div>
 </template>
 

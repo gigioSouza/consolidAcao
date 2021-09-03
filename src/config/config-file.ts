@@ -1,4 +1,4 @@
-import { useConfig } from '../store/config';
+import { useConfig } from '../store/config.store';
 import { getConfigFile } from '../tauri/config-file';
 
 export async function loadConfigFile(): Promise<boolean> {

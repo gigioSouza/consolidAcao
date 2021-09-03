@@ -3,7 +3,6 @@ import { computed, ref, toRefs, useSlots, watch } from 'vue';
 import { Column, SortedBy } from '../types/table';
 import range from 'lodash-es/range';
 import get from 'lodash-es/get';
-import { size } from 'lodash-es';
 
 const props = withDefaults(defineProps<{
   columns: Column[],
@@ -146,9 +145,9 @@ const toElement = computed(() => {
               {{ col.label }}
             </span>
             <template v-if="col.sortable === true">
-              <i-mdi-menu-up v-if="col.sortedBy === sortedBy.ASC" class="sort-icon"/>
-              <i-mdi-menu-down v-else-if="col.sortedBy === sortedBy.DESC" class="sort-icon"/>
-              <i-mdi-menu-swap v-else class="sort-icon"/>
+              <icon-mdi-menu-up v-if="col.sortedBy === sortedBy.ASC" class="sort-icon"/>
+              <icon-mdi-menu-down v-else-if="col.sortedBy === sortedBy.DESC" class="sort-icon"/>
+              <icon-mdi-menu-swap v-else class="sort-icon"/>
             </template>
           </span>
         </th>
@@ -159,8 +158,8 @@ const toElement = computed(() => {
           <td :colspan="columns.length">{{ emptyMessage }}</td>
         </tr>
         <tr v-for="(item, i) in items" :key="`row_${i}`" @click="onItemClick($event, item)">
-          <slot name="item" :item="item" :index="i"/>
-          <template v-if="slots.item == null">
+          <slot v-if="slots.item != null" name="item" :item="item" :index="i"/>
+          <template v-else>
             <td
               v-for="col in columns"
               :key="`row_${i}_col_${col.prop}`"
@@ -182,12 +181,12 @@ const toElement = computed(() => {
       <ul class="pagination">
         <li class="page first">
           <button type="button" :disabled="isFirstPage" @click="goToPage(0)">
-            <i-mdi-page-first/>
+            <icon-mdi-page-first/>
           </button>
         </li>
         <li class="page prev">
           <button type="button" :disabled="isFirstPage" @click="goToPage(currentPage - 1)">
-            <i-mdi-chevron-left/>
+            <icon-mdi-chevron-left/>
           </button>
         </li>
         <li v-for="page in pages" :key="`page_${page}`" class="page" :class="{ active: currentPage === page }">
@@ -195,12 +194,12 @@ const toElement = computed(() => {
         </li>
         <li class="page next">
           <button type="button" :disabled="isLastPage" @click="goToPage(currentPage + 1)">
-            <i-mdi-chevron-right/>
+            <icon-mdi-chevron-right/>
           </button>
         </li>
         <li class="page last">
           <button type="button" :disabled="isLastPage" @click="goToPage(totalPages - 1)">
-            <i-mdi-page-last/>
+            <icon-mdi-page-last/>
           </button>
         </li>
       </ul>

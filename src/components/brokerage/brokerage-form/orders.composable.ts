@@ -1,8 +1,25 @@
-import { BrokerageNote, BrokerageOrder, OrderType } from '../../../../tauri/brokerage';
+import { BrokerageNote, BrokerageOrder, OrderType } from '../../../tauri/brokerage';
 import { Ref, ref, UnwrapRef } from 'vue';
 import useVuelidate from '@vuelidate/core';
 import { numeric, required } from '@vuelidate/validators';
 import { cloneDeep } from 'lodash-es';
+
+export const OrderRules = {
+  order_type: {
+    required
+  },
+  'symbol': {
+    required
+  },
+  amount: {
+    required,
+    numeric
+  },
+  order_value: {
+    required,
+    numeric
+  }
+};
 
 export function useOrder(note: UnwrapRef<BrokerageNote>, symbolRef: Ref) {
   const order: Ref<BrokerageOrder> = ref({
@@ -11,7 +28,8 @@ export function useOrder(note: UnwrapRef<BrokerageNote>, symbolRef: Ref) {
     amount: 0,
     order_value: 0
   });
-  const $order = useVuelidate(orderRules(), order);
+
+  const $order = useVuelidate(OrderRules, order, { $registerAs: 'brokerageOrderForm', $stopPropagation: true });
 
   function resetOrder() {
     order.value = {
@@ -38,26 +56,6 @@ export function useOrder(note: UnwrapRef<BrokerageNote>, symbolRef: Ref) {
     $order,
     resetOrder,
     addOrder,
-    removeOrder,
-    orderRules
-  }
-}
-
-export function orderRules() {
-  return {
-    order_type: {
-      required
-    },
-    'symbol': {
-      required
-    },
-    amount: {
-      required,
-      numeric
-    },
-    order_value: {
-      required,
-      numeric
-    }
-  }
+    removeOrder
+  };
 }

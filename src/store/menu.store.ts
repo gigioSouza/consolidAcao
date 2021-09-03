@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useConfig } from './config';
+import { useConfig } from './config.store';
 
 export const useMenu = defineStore('menu', {
   state: () => {
