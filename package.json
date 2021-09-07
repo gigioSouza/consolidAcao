@@ -10,6 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "gsap": "3.7.1",
     "luxon": "2.0.2",
     "pinia": "2.0.0-rc.6",
     "v-money3": "3.15.0",

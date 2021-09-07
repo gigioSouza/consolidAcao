@@ -64,7 +64,7 @@ function onBrokerChange() {
   fetchBrokerageNotePage();
 }
 
-function onItemClick({ item }) {
+function onItemClick(item) {
   router.push({
     name: 'brokerage-view',
     params: {
@@ -106,7 +106,7 @@ const columns: Ref<Column[]> = ref([
 
 <template>
   <HeaderSlot>
-    <router-link :to="{ name: 'brokerage-new' }" class="button primary">Nova <icon-mdi-plus class="icon"/></router-link>
+    <Button :to="{ name: 'brokerage-new' }" variant="primary" icon="plus">Nova</Button>
   </HeaderSlot>
 
   <div class="card">
@@ -121,7 +121,6 @@ const columns: Ref<Column[]> = ref([
       @goToPage="onGoToPage"
       @pageSizeChange="onPageSizeChange"
       @sortBy="onSortBy"
-      @itemClick="onItemClick"
       empty-message="Nenhuma nota de corretagem cadastrada.">
       <template #header>
         <div class="field inline brokerSelector">
@@ -139,11 +138,13 @@ const columns: Ref<Column[]> = ref([
         </div>
       </template>
       <template #item="{ item }">
-        <td class="broker">{{ item.broker.name }}</td>
-        <td class="tradingDate text-center">{{ $filters.dateFromISO(item.trading_date) }}</td>
-        <td class="totalPurchased text-right">{{ $filters.toMoney(item.total_purchased) }}</td>
-        <td class="totalSold text-right">{{ $filters.toMoney(item.total_sold) }}</td>
-        <td class="totalTransacted text-right">{{ $filters.toMoney(item.total_transacted) }}</td>
+        <tr @click="onItemClick(item)">
+          <td class="broker">{{ item.broker.name }}</td>
+          <td class="tradingDate text-center">{{ $filters.dateFromISO(item.trading_date) }}</td>
+          <td class="totalPurchased text-right">{{ $filters.toMoney(item.total_purchased) }}</td>
+          <td class="totalSold text-right">{{ $filters.toMoney(item.total_sold) }}</td>
+          <td class="totalTransacted text-right">{{ $filters.toMoney(item.total_transacted) }}</td>
+        </tr>
       </template>
     </Table>
   </div>

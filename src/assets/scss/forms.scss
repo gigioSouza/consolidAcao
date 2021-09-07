@@ -46,10 +46,10 @@
     @apply font-light text-gray-700 text-sm mb-0.5;
   }
 
-  .radio-group {
+  .radio-group, .checkbox-group {
     @apply flex flex-col;
 
-    .radio {
+    .radio, .checkbox {
       @apply flex flex-row items-center text-black font-normal m-0;
 
       input {

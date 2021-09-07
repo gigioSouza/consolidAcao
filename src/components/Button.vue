@@ -3,10 +3,11 @@ import { computed, defineAsyncComponent, useSlots, withDefaults } from 'vue';
 
 const props = withDefaults(defineProps<{
   text?: string,
-  icon?: string,
+  icon?: string|Object,
   variant?: string,
   submit?: boolean,
-  reset?: boolean
+  reset?: boolean,
+  to?: Object
 }>(), {
   text: '',
   submit: false,
@@ -37,7 +38,15 @@ const buttonType = computed(() => {
 </script>
 
 <template>
-  <button :type="buttonType" class="button" :class="props.variant">
+  <router-link v-if="props.to != null" :to="props.to" class="button" :class="props.variant">
+    <slot/>
+    <component
+      v-if="iconComponent != null"
+      :is="iconComponent" :class="{
+        icon: slots.default != null
+      }"/>
+  </router-link>
+  <button v-else :type="buttonType" class="button" :class="props.variant">
     <slot/>
     <component
       v-if="iconComponent != null"
@@ -65,6 +74,10 @@ const buttonType = computed(() => {
     @apply outline-none;
   }
 
+  &.empty {
+    @apply shadow-none;
+  }
+
   &.light {
     @apply bg-gray-200 text-gray-800 font-light;
     @include button_focus($color: #a1a1aa);
@@ -89,7 +102,7 @@ const buttonType = computed(() => {
     @apply bg-opacity-30 cursor-not-allowed shadow-none;
   }
 
-  &:hover {
+  &:hover:not(&.empty) {
     @apply shadow-md;
   }
 

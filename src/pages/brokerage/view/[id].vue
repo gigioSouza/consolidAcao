@@ -7,9 +7,13 @@ meta:
 
 <script lang="ts" setup>
 import { useRoute, useRouter } from 'vue-router';
-import { onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useBrokerage } from '../../../store/brokerage.store';
 import { OrderType } from '../../../tauri/brokerage';
+import viewDetailsIcon from '~icons/mdi/chevron-down';
+import hideDetailsIcon from '~icons/mdi/chevron-up';
+
+const orderType = OrderType;
 
 const route = useRoute();
 const store = useBrokerage();
@@ -25,10 +29,50 @@ function edit() {
     params: route.params
   });
 }
+
+const orderFilter = ref([OrderType.BUY, OrderType.SELL]);
+const purchaseOrders = computed(() => brokerageNote.orders.filter(order => order.order_type === OrderType.BUY));
+const sellOrders = computed(() => brokerageNote.orders.filter(order => order.order_type === OrderType.SELL));
+const orders = computed(() => {
+  if (orderFilter.value.length === 0) {
+    return [];
+  }
+  if (orderFilter.value.length === 1) {
+    return orderFilter.value[0] === OrderType.BUY ? purchaseOrders.value : sellOrders.value;
+  }
+  return brokerageNote.orders;
+});
+
+const columns = [
+  {
+    prop: 'symbol',
+    label: 'Papel',
+    class: 'text-center'
+  },
+  {
+    prop: 'amount',
+    label: 'Quantidade',
+    class: 'text-center'
+  },
+  {
+    prop: 'order_value',
+    label: 'Valor da Ordem',
+    class: 'text-right'
+  },
+  {
+    prop: 'total_cost',
+    label: 'Custo da Ordem',
+    class: 'text-right'
+  },
+  {
+    prop: '',
+    label: '',
+    class: 'w-8'
+  }
+];
 </script>
 
 <template>
-<!--  <pre>{{ brokerageNote }}</pre>-->
   <HeaderSlot>
     <Button
       variant="light"
@@ -94,56 +138,83 @@ function edit() {
   </div>
 
   <div class="card orders">
-    <h2 class="subtitle">Ordens ({{ brokerageNote?.orders?.length }})</h2>
-    <div
-      v-for="order in brokerageNote.orders"
-      :key="`order_${order.id}`"
-      class="card order"
-      :class="{
-        buy: order.order_type === OrderType.BUY,
-        sell: order.order_type === OrderType.SELL
-      }">
-      <div class="field">
-        <label>Papel</label>
-        <span class="input">{{ order.symbol }}</span>
-      </div>
-      <div class="field">
-        <label>Quantidade</label>
-        <span class="input">{{ order.amount }}</span>
-      </div>
-      <div class="field">
-        <label>Valor da Ordem</label>
-        <span class="input v-money3">{{ $filters.toMoney(order.order_value) }}</span>
-      </div>
-      <div class="field">
-        <label>Valor da Unidade</label>
-        <span class="input v-money3">{{ $filters.toMoney(order.unit_value) }}</span>
-      </div>
-      <div class="field">
-        <label>Taxa de Liquidação</label>
-        <span class="input v-money3">{{ $filters.toMoney(order.settlement_fee) }}</span>
-      </div>
-      <div class="field">
-        <label>Emolumentos</label>
-        <span class="input v-money3">{{ $filters.toMoney(order.emolument_fee) }}</span>
-      </div>
-      <div class="field">
-        <label>Corretagem</label>
-        <span class="input v-money3">{{ $filters.toMoney(order.broker_fee) }}</span>
-      </div>
-      <div class="field">
-        <label>ISS</label>
-        <span class="input v-money3">{{ $filters.toMoney(order.iss_tax) }}</span>
-      </div>
-      <div class="field">
-        <label>IRRF</label>
-        <span class="input v-money3">{{ $filters.toMoney(order.income_tax) }}</span>
-      </div>
-      <div class="field">
-        <label>Custo da Operação</label>
-        <span class="input v-money3">{{ $filters.toMoney(order.total_cost) }}</span>
+    <div class="orders-header">
+      <h2>Total ({{ brokerageNote?.orders?.length }})</h2>
+
+      <div class="orders-filter">
+        <div class="field inline">
+          <label for="purchaseCheckbox">Compra ({{ purchaseOrders.length }})</label>
+          <input
+            id="purchaseCheckbox"
+            type="checkbox"
+            class="checkbox"
+            v-model="orderFilter"
+            :value="orderType.BUY"
+            :disabled="purchaseOrders.length === 0"/>
+        </div>
+        <div class="field inline">
+          <label for="sellCheckbox">Venda ({{ sellOrders.length }})</label>
+          <input
+            id="sellCheckbox"
+            type="checkbox"
+            class="checkbox"
+            v-model="orderFilter"
+            :value="orderType.SELL"
+            :disabled="sellOrders.length === 0"/>
+        </div>
       </div>
     </div>
+    <Table
+      :columns="columns"
+      :items="orders"
+      class="table"
+      empty-message="Não há dados para o filtro selecionado."
+      expandable>
+      <template #item="{ item }">
+        <tr class="row" :class="item.order_type == orderType.BUY ? 'buy' : 'sell'">
+          <td class="text-center">{{ item.symbol }}</td>
+          <td class="text-center">{{ item.amount }}</td>
+          <td class="text-right">{{ $filters.toMoney(item.order_value) }}</td>
+          <td class="text-right">{{ $filters.toMoney(item.total_cost) }}</td>
+          <td class="text-center w-8">
+            <Button
+              class="text-lg"
+              variant="empty"
+              :icon="item.expanded ? hideDetailsIcon : viewDetailsIcon"
+              @click="item.expanded = !item.expanded"
+            />
+          </td>
+        </tr>
+      </template>
+      <template #expandable="{ item }">
+        <div class="order-detail" :class="item.order_type == orderType.BUY ? 'buy' : 'sell'">
+          <div class="field">
+            <label>Valor da Unidade</label>
+            <span class="input v-money3">{{ $filters.toMoney(item.unit_value) }}</span>
+          </div>
+          <div class="field">
+            <label>Taxa de Liquidação</label>
+            <span class="input v-money3">{{ $filters.toMoney(item.settlement_fee) }}</span>
+          </div>
+          <div class="field">
+            <label>Emolumentos</label>
+            <span class="input v-money3">{{ $filters.toMoney(item.emolument_fee) }}</span>
+          </div>
+          <div class="field">
+            <label>Corretagem</label>
+            <span class="input v-money3">{{ $filters.toMoney(item.broker_fee) }}</span>
+          </div>
+          <div class="field">
+            <label>ISS</label>
+            <span class="input v-money3">{{ $filters.toMoney(item.iss_tax) }}</span>
+          </div>
+          <div class="field">
+            <label>IRRF</label>
+            <span class="input v-money3">{{ $filters.toMoney(item.income_tax) }}</span>
+          </div>
+        </div>
+      </template>
+    </Table>
   </div>
 </template>
 
@@ -158,22 +229,38 @@ function edit() {
 }
 
 .orders {
+  .orders-header {
+    @apply flex flex-row justify-between;
+
+    .orders-filter {
+      @apply flex flex-row gap-4;
+    }
+  }
+
   .subtitle {
     @apply text-xl text-white bg-light-blue-600 shadow mb-2 p-2 rounded;
   }
 
-  .order {
-    @apply grid grid-cols-3 gap-2;
+  .table {
+    .row {
+      @apply !border-white;
 
-    &:not(&:last-of-type) {
-      @apply mb-4;
+      &.buy {
+        @apply bg-red-600 bg-opacity-20;
+      }
+      &.sell {
+        @apply bg-lime-600 bg-opacity-20;
+      }
     }
+    .order-detail {
+      @apply grid grid-cols-3 gap-2 px-6 py-4;
 
-    &.buy {
-      @apply bg-red-600 bg-opacity-20;
-    }
-    &.sell {
-      @apply bg-lime-600 bg-opacity-20;
+      &.buy {
+        @apply bg-red-600 bg-opacity-10;
+      }
+      &.sell {
+        @apply bg-lime-600 bg-opacity-10;
+      }
     }
   }
 }

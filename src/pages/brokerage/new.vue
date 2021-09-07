@@ -43,18 +43,17 @@ async function saveBrokerageNote() {
   </div>
 
   <HeaderSlot>
-    <button
-      type="button"
-      class="button cancel"
+    <Button
+      variant="light"
       @click="cancel">Cancelar
-    </button>
-    <button
-      type="button"
-      class="button primary ml-2"
+    </Button>
+    <Button
+      variant="primary"
+      class="ml-2"
       :disabled="v.$invalid"
-      @click="saveBrokerageNote">
+      @click="saveBrokerageNote"
+      icon="save">
       Salvar
-      <icon-mdi-content-save class="icon" />
-    </button>
+    </Button>
   </HeaderSlot>
 </template>

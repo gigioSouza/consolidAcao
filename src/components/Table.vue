@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { computed, ref, toRefs, useSlots, watch } from 'vue';
+import { computed, reactive, ref, toRefs, unref, useSlots, watch } from 'vue';
 import { Column, SortedBy } from '../types/table';
 import range from 'lodash-es/range';
 import get from 'lodash-es/get';
+import gsap from 'gsap';
 
 const props = withDefaults(defineProps<{
   columns: Column[],
@@ -12,23 +13,25 @@ const props = withDefaults(defineProps<{
   currentPage?: number,
   pageSize?: number,
   totalPages?: number,
-  totalElements?: number
+  totalElements?: number,
+  expandable?: boolean
 }>(), {
   pageable: false,
   currentPage: 0,
   pageSize: 10,
   totalPages: 0,
-  totalElements: 0
+  totalElements: 0,
+  expandable: false
 });
 const {
   columns,
-  items,
   emptyMessage,
   pageable,
   currentPage,
   pageSize,
   totalPages,
-  totalElements
+  totalElements,
+  expandable
 } = toRefs(props);
 
 const emit = defineEmits<{
@@ -41,7 +44,9 @@ const emit = defineEmits<{
 const slots = useSlots();
 
 const sortedBy = SortedBy;
-const showEmptyMessage = computed(() => items.value == null || items.value.length === 0);
+const showEmptyMessage = computed(() => {
+  return props.items == null || props.items.length === 0
+});
 
 function sortBy(column: Column) {
   if (column.sortable) {
@@ -66,21 +71,6 @@ const pages = computed(() => {
   return range(currentPage.value - 2, currentPage.value + 3);
 });
 
-function onItemClick(event: MouseEvent, item: any) {
-  const column = event.target as HTMLElement;
-  const line = column.parentNode!;
-
-  for (let i = 0; i < line.children.length; i++) {
-    if (line.children[i] === column) {
-      emit('itemClick', {
-        item,
-        column: columns.value[i]
-      });
-      break;
-    }
-  }
-}
-
 function goToPage(newPage: number) {
   if (newPage >= 0 && newPage < totalPages.value) {
     emit('goToPage', newPage);
@@ -102,6 +92,48 @@ const toElement = computed(() => {
   const to = (currentPage.value * pageSize.value) + pageSize.value;
   return totalElements.value > to ? to : totalElements.value;
 });
+
+const items = computed(() => {
+  if (!Array.isArray(props.items)) return [];
+  if (expandable.value === false) return props.items;
+
+  return props.items.map(item => {
+    return reactive({
+      ...item,
+      expanded: false
+    });
+  })
+});
+
+function beforeEnter(el) {
+  gsap.set(el, {
+    height: 0,
+    overflow: 'hidden'
+  });
+}
+
+function enter(el, done) {
+  gsap.to(el, {
+    duration: .25,
+    height: 'auto',
+  });
+  gsap.to(el, {
+    duration: .3,
+    onComplete: done
+  });
+}
+
+function leave(el, done) {
+  gsap.to(el, {
+    duration: .1,
+  });
+  gsap.to(el, {
+    duration: .3,
+    height: 0,
+    overflow: 'hidden',
+    onComplete: done
+  });
+}
 </script>
 
 <template>
@@ -127,52 +159,70 @@ const toElement = computed(() => {
         </div>
       </div>
     </template>
-    <table class="table">
-      <thead>
-      <tr>
-        <th
-          v-for="(col, i) in columns"
-          :key="`col_${col.prop}_${i}`"
-          @click="sortBy(col)"
-          :class="[
-            col.class,
-            {
-              sortable: col.sortable
-            }
-          ]">
-          <span class="wrapper">
-            <span class="text">
-              {{ col.label }}
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+        <tr>
+          <th
+            v-for="(col, i) in columns"
+            :key="`col_${col.prop}_${i}`"
+            @click="sortBy(col)"
+            :class="[
+              col.class,
+              {
+                sortable: col.sortable
+              }
+            ]">
+            <span class="wrapper">
+              <span class="text">
+                {{ col.label }}
+              </span>
+              <template v-if="col.sortable === true">
+                <icon-mdi-menu-up v-if="col.sortedBy === sortedBy.ASC" class="sort-icon"/>
+                <icon-mdi-menu-down v-else-if="col.sortedBy === sortedBy.DESC" class="sort-icon"/>
+                <icon-mdi-menu-swap v-else class="sort-icon"/>
+              </template>
             </span>
-            <template v-if="col.sortable === true">
-              <icon-mdi-menu-up v-if="col.sortedBy === sortedBy.ASC" class="sort-icon"/>
-              <icon-mdi-menu-down v-else-if="col.sortedBy === sortedBy.DESC" class="sort-icon"/>
-              <icon-mdi-menu-swap v-else class="sort-icon"/>
+          </th>
+        </tr>
+        </thead>
+        <tbody>
+          <tr v-if="showEmptyMessage" class="empty-message">
+            <td :colspan="columns.length">{{ emptyMessage }}</td>
+          </tr>
+          <template v-for="(item, i) in items" :key="`row_${i}`">
+            <slot v-if="slots.item != null" name="item" :item="item" :index="i"/>
+            <template v-else>
+              <tr>
+                <td
+                  v-for="col in columns"
+                  :key="`row_${i}_col_${col.prop}`"
+                  :class="col.class">
+                  {{ get(item, col.prop, '--') }}
+                </td>
+              </tr>
             </template>
-          </span>
-        </th>
-      </tr>
-      </thead>
-      <tbody>
-        <tr v-if="showEmptyMessage" class="empty-message">
-          <td :colspan="columns.length">{{ emptyMessage }}</td>
-        </tr>
-        <tr v-for="(item, i) in items" :key="`row_${i}`" @click="onItemClick($event, item)">
-          <slot v-if="slots.item != null" name="item" :item="item" :index="i"/>
-          <template v-else>
-            <td
-              v-for="col in columns"
-              :key="`row_${i}_col_${col.prop}`"
-              :class="col.class">
-              {{ get(item, col.prop, '--') }}
-            </td>
+            <tr v-show="expandable" class="expandable" :class="{ expanded: item.expanded }">
+              <td :colspan="columns.length">
+                <transition
+                  name="expanded"
+                  @before-enter="beforeEnter"
+                  @enter="enter"
+                  @leave="leave"
+                >
+                  <div v-show="item.expanded">
+                    <slot name="expandable" :item="item" :index="i" />
+                  </div>
+                </transition>
+              </td>
+            </tr>
           </template>
-        </tr>
-      </tbody>
-      <tfoot v-if="slots.footer != null">
-        <slot name="footer"/>
-      </tfoot>
-    </table>
+        </tbody>
+        <tfoot v-if="slots.footer != null">
+          <slot name="footer"/>
+        </tfoot>
+      </table>
+    </div>
     <div v-if="showPagination" class="pageable">
       <p class="legend">
         Apresentando {{ fromElement }} - {{ toElement }} de {{ totalElements }}
@@ -221,74 +271,53 @@ const toElement = computed(() => {
     }
   }
 
-  table.table {
-    @apply w-full;
+  .table-wrapper {
+    @apply rounded shadow overflow-hidden;
 
-    thead {
-      tr {
-        th {
-          @apply px-2 pt-1 bg-light-blue-600 border border-blue-gray-600 border-t-0 text-white font-normal;
+    table.table {
+      @apply w-full;
 
-          &:first-child {
-            @apply rounded-tl border-l-0;
-          }
+      thead {
+        @apply bg-light-blue-600 shadow;
 
-          &:last-child {
-            @apply rounded-tr border-r-0;
-          }
+        tr {
+          th {
+            @apply px-6 py-2 text-sm tracking-wider uppercase text-white font-medium;
 
-          &.sortable {
-            @apply cursor-pointer;
-          }
+            &.sortable {
+              @apply cursor-pointer;
+            }
 
-          > .wrapper {
-            @apply flex flex-row justify-between items-center;
+            > .wrapper {
+              @apply flex flex-row justify-between items-center;
 
-            .text {
-              @apply flex-grow;
+              .text {
+                @apply flex-grow;
+              }
             }
           }
         }
       }
-    }
-    tbody {
-      tr {
-        &:nth-child(even) {
-          @apply bg-gray-200;
-        }
-        &:nth-child(odd) {
-          @apply bg-white;
-        }
+      tbody {
+        @apply divide-y divide-gray-200 shadow;
 
-        &:last-of-type {
-          td {
-            @apply shadow-sm border-b-0;
-
-            &:first-child {
-              @apply rounded-bl border-l-0;
-            }
-
-            &:last-child {
-              @apply rounded-br border-r-0;
+        tr {
+          &.empty-message {
+            td {
+              @apply text-center rounded shadow-sm;
             }
           }
-        }
 
-        &.empty-message {
+          &.expandable {
+            @apply h-0 p-0 m-0 border-none overflow-hidden;
+
+            td {
+              @apply h-0 p-0 m-0 border-none overflow-hidden;
+            }
+          }
+
           td {
-            @apply text-center rounded shadow-sm;
-          }
-        }
-
-        td {
-          @apply border border-blue-gray-600 px-2 py-1;
-
-          &:first-child {
-            @apply border-l-0;
-          }
-
-          &:last-child {
-            @apply border-r-0;
+            @apply px-6 py-3 text-sm;
           }
         }
       }

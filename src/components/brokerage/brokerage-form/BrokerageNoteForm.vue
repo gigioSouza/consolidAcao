@@ -239,27 +239,29 @@ const columns: Ref<Column[]> = ref([
       <template #item="{ item, index }">
         <ValidateEach :state="item" :rules="OrderRules" :key="`order_validation_${index}`">
           <template #default="{ v }">
-            <td class="orderType">
-              <select v-model="v.order_type.$model" class="select">
-                <option :value="OrderType.BUY">Compra</option>
-                <option :value="OrderType.SELL">Venda</option>
-              </select>
-            </td>
-            <td class="symbol">
-              <input type="text" v-model="v.symbol.$model" class="input symbol"/>
-            </td>
-            <td class="amount">
-              <input type="text" v-model.number="v.amount.$model" class="input"/>
-            </td>
-            <td class="orderValue">
-              <money type="text" v-model.number="v.order_value.$model" class="input" v-bind="$configs.vMoney"/>
-            </td>
-            <td>
-              <Button
-                variant="danger"
-                @click="removeOrder(item)"
-                icon="delete"/>
-            </td>
+            <tr>
+              <td class="orderType">
+                <select v-model="v.order_type.$model" class="select">
+                  <option :value="OrderType.BUY">Compra</option>
+                  <option :value="OrderType.SELL">Venda</option>
+                </select>
+              </td>
+              <td class="symbol">
+                <input type="text" v-model="v.symbol.$model" class="input symbol"/>
+              </td>
+              <td class="amount">
+                <input type="text" v-model.number="v.amount.$model" class="input"/>
+              </td>
+              <td class="orderValue">
+                <money type="text" v-model.number="v.order_value.$model" class="input" v-bind="$configs.vMoney"/>
+              </td>
+              <td>
+                <Button
+                  variant="danger"
+                  @click="removeOrder(item)"
+                  icon="delete"/>
+              </td>
+            </tr>
           </template>
         </ValidateEach>
       </template>

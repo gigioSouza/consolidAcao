@@ -23,10 +23,13 @@ async function saveBrokerageNote() {
   await store.updateBrokerageNote();
 }
 async function deleteBrokerageNote() {
-  await store.deleteBrokerageNote();
-  router.push({
-    name: 'brokerage-list'
-  });
+  // TODO confirm bu
+  if (await confirm('Deseja realmente excluir esta Nota de Corretagem?')) {
+    await store.deleteBrokerageNote();
+    router.push({
+      name: 'brokerage-list'
+    });
+  }
 }
 </script>
 
